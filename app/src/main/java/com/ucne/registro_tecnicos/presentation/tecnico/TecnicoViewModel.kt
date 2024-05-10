@@ -1,4 +1,4 @@
-package com.ucne.registro_tecnicos.presentation.ticket
+package com.ucne.registro_tecnicos.presentation.tecnico
 
 import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.SavedStateHandle
@@ -22,6 +22,11 @@ class TecnicoViewModel(private val repository: TecnicoRepository) : ViewModel() 
     fun saveTecnico(tecnico: TecnicoEntity) {
         viewModelScope.launch {
             repository.saveTecnico(tecnico)
+        }
+    }
+    fun deleteTecnico(tecnico: TecnicoEntity) {
+        viewModelScope.launch {
+            repository.deleteTecnico(tecnico)
         }
     }
 

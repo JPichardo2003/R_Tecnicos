@@ -17,9 +17,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.room.Room
 import com.ucne.registro_tecnicos.data.local.database.TecnicoDb
 import com.ucne.registro_tecnicos.data.repository.TecnicoRepository
-import com.ucne.registro_tecnicos.presentation.ticket.TecnicoListScreen
-import com.ucne.registro_tecnicos.presentation.ticket.TecnicoScreen
-import com.ucne.registro_tecnicos.presentation.ticket.TecnicoViewModel
+import com.ucne.registro_tecnicos.presentation.tecnico.TecnicoListScreen
+import com.ucne.registro_tecnicos.presentation.tecnico.TecnicoScreen
+import com.ucne.registro_tecnicos.presentation.tecnico.TecnicoViewModel
 import com.ucne.registro_tecnicos.ui.theme.Registro_TecnicosTheme
 
 class MainActivity : ComponentActivity() {
