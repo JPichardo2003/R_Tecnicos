@@ -80,11 +80,12 @@ fun TecnicoListBody(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable { onVerTecnico(tecnico) }
-                        .padding(16.dp)
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(text = tecnico.tecnicoId.toString(), modifier = Modifier.weight(0.10f))
                     Text(text = tecnico.nombre.toString(), modifier = Modifier.weight(0.370f))
-                    Text(text = tecnico.sueldoHora.toString(), modifier = Modifier.weight(0.40f))
+                    Text(text = tecnico.sueldoHora.toString(), modifier = Modifier.weight(0.30f))
 
                     IconButton(
                         onClick = { tecnicoToDelete = tecnico
