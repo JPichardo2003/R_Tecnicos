@@ -45,13 +45,18 @@ fun TecnicoScreen(
     TecnicoBody(
         onSaveTecnico = { tecnico ->
             viewModel.saveTecnico(tecnico)
+        },
+        onNombreExist = {nombre, id: Int? ->
+            viewModel.nombreExists(nombre, id)
         }
     )
 }
-var nombreNoValido by mutableStateOf(false)
+var nombreVacio by mutableStateOf(false)
+var nombreExtenso by mutableStateOf(false)
+var nombreRepetido by mutableStateOf(false)
 var sueldoHoraNoValido by mutableStateOf(false)
 @Composable
-fun TecnicoBody(onSaveTecnico: (TecnicoEntity) -> Unit) {
+fun TecnicoBody(onSaveTecnico: (TecnicoEntity) -> Unit, onNombreExist: (String, Int?) -> Boolean) {
     var tecnicoId by remember { mutableStateOf("") }
     var nombre by remember { mutableStateOf("") }
     var sueldoHora by remember { mutableStateOf<Double?>(null) }
@@ -72,8 +77,12 @@ fun TecnicoBody(onSaveTecnico: (TecnicoEntity) -> Unit) {
                 value = nombre,
                 onValueChange = { name ->
                     val regex = Regex("[a-zA-Z ]*")
-                    if (name.matches(regex)) { nombre = name }
+                    if (name.matches(regex) && !name.startsWith(" ")) {
+                        nombre = name
+                        nombreVacio = nombre.isEmpty()
+                    }
                 },
+                isError = nombreExtenso || nombreVacio || nombreRepetido,
                 keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
                 trailingIcon = {
                     Icon(
@@ -83,22 +92,30 @@ fun TecnicoBody(onSaveTecnico: (TecnicoEntity) -> Unit) {
                 },
                 modifier = Modifier.fillMaxWidth()
             )
-            if(nombreNoValido){
-                if(nombre.isEmpty()){
-                    Text(
-                        text = "Campo Obligatorio.",
-                        color = Color.Red,
-                        fontStyle = FontStyle.Italic,
-                        fontSize = 14.sp
-                    )
-                }else if(nombre.length > 30){
-                    Text(
-                        text = "Nombre no debe exceder los 30 caracteres.",
-                        color = Color.Red,
-                        fontStyle = FontStyle.Italic,
-                        fontSize = 14.sp
-                    )
-                }
+            nombreRepetido = onNombreExist(nombre, tecnicoId.toIntOrNull())
+            if(nombreRepetido){
+                Text(
+                    text = "Nombre ya existe.",
+                    color = Color.Red,
+                    fontStyle = FontStyle.Italic,
+                    fontSize = 14.sp
+                )
+            }
+            if(nombreVacio){
+                Text(
+                    text = "Campo Obligatorio.",
+                    color = Color.Red,
+                    fontStyle = FontStyle.Italic,
+                    fontSize = 14.sp
+                )
+            }
+            if(nombreExtenso){
+                Text(
+                    text = "Nombre debe ser menor a 30 caracteres.",
+                    color = Color.Red,
+                    fontStyle = FontStyle.Italic,
+                    fontSize = 14.sp
+                )
             }
 
             OutlinedTextField(
@@ -111,8 +128,10 @@ fun TecnicoBody(onSaveTecnico: (TecnicoEntity) -> Unit) {
                     val regex = Regex("[0-9]*\\.?[0-9]{0,2}")
                     if (it.matches(regex)) {
                         sueldoHora = it.toDoubleOrNull() ?: 0.0
+                        sueldoHoraNoValido = (sueldoHora ?: 0.0) <= 0.0
                     }
                 },
+                isError = sueldoHoraNoValido,
                 trailingIcon = {
                     Icon(
                         painter = painterResource(id = R.drawable.icons8dollarblack),
@@ -122,14 +141,12 @@ fun TecnicoBody(onSaveTecnico: (TecnicoEntity) -> Unit) {
                 modifier = Modifier.fillMaxWidth()
             )
             if(sueldoHoraNoValido){
-                if((sueldoHora ?: 0.0) <= 0.0){
-                    Text(
-                        text = "Sueldo por Hora debe ser > 0.0",
-                        color = Color.Red,
-                        fontStyle = FontStyle.Italic,
-                        fontSize = 14.sp
-                    )
-                }
+                Text(
+                    text = "Sueldo por Hora debe ser > 0.0",
+                    color = Color.Red,
+                    fontStyle = FontStyle.Italic,
+                    fontSize = 14.sp
+                )
             }
             Spacer(modifier = Modifier.padding(2.dp))
             Row(
@@ -141,7 +158,8 @@ fun TecnicoBody(onSaveTecnico: (TecnicoEntity) -> Unit) {
                         tecnicoId = ""
                         nombre = ""
                         sueldoHora = null
-                        nombreNoValido = false
+                        nombreVacio = false
+                        nombreExtenso = false
                         sueldoHoraNoValido = false
                     }
                 ) {
@@ -153,7 +171,7 @@ fun TecnicoBody(onSaveTecnico: (TecnicoEntity) -> Unit) {
                 }
                 OutlinedButton(
                     onClick = {
-                        if (validar(nombre,sueldoHora)) {
+                        if (validar(nombre,sueldoHora) && !onNombreExist(nombre, tecnicoId.toIntOrNull())) {
                             onSaveTecnico(
                                 TecnicoEntity(
                                     tecnicoId = tecnicoId.toIntOrNull(),
@@ -165,7 +183,8 @@ fun TecnicoBody(onSaveTecnico: (TecnicoEntity) -> Unit) {
                             tecnicoId = ""
                             nombre = ""
                             sueldoHora = null
-                            nombreNoValido = false
+                            nombreVacio = false
+                            nombreExtenso = false
                             sueldoHoraNoValido = false
                         }
                         else{ errorGuardar = true}
@@ -194,25 +213,20 @@ fun TecnicoBody(onSaveTecnico: (TecnicoEntity) -> Unit) {
 fun Notification(message: String) {
     Toast.makeText(LocalContext.current, message, Toast.LENGTH_LONG).show()
 }
-private fun validar(nombre: String, sueldoHora: Double?): Boolean {
-    var pass = false
-    if (nombre.isNotEmpty() && (sueldoHora ?: 0.0) > 0.0) {
-        if (nombre.length <= 30) {
-            pass = true
-        }else{
-            nombreNoValido = true
-        }
-    }else{
-        nombreNoValido = true
-        sueldoHoraNoValido = true
-    }
-    return pass
+private fun validar(nombre: String, sueldoHora: Double?) : Boolean {
+    nombreVacio = nombre.isEmpty()
+    nombreExtenso = nombre.length > 30
+    sueldoHoraNoValido = (sueldoHora ?: 0.0) <= 0.0
+    return !nombreExtenso && !nombreVacio && !sueldoHoraNoValido
 }
 @Preview
 @Composable
 private fun TecnicoPreview() {
     Registro_TecnicosTheme {
-        TecnicoBody() {
-        }
+        TecnicoBody(
+            onSaveTecnico = {
+            },
+            onNombreExist = { _,_ -> false }
+        )
     }
 }
