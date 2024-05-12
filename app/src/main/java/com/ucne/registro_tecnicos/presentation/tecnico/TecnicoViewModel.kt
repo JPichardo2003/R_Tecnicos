@@ -29,7 +29,9 @@ class TecnicoViewModel(private val repository: TecnicoRepository) : ViewModel() 
             repository.deleteTecnico(tecnico)
         }
     }
-
+    fun nombreExists(nombre: String, id: Int?): Boolean {
+        return tecnicos.value.any { it.nombre?.replace(" ", "")?.uppercase() == nombre.replace(" ", "").uppercase() && it.tecnicoId != id }
+    }
 
     companion object {
         fun provideFactory(
