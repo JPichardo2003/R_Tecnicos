@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     id("com.google.devtools.ksp")
+    alias(libs.plugins.kotlinx.serialization)
 }
 
 android {
@@ -66,6 +67,7 @@ dependencies {
 
     //navegacion
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.kotlinx.serialization.json) //nuevo para navigation
 
     //Room
     implementation(libs.androidx.room.runtime)
