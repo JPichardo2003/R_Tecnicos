@@ -1,16 +1,55 @@
 package com.ucne.registro_tecnicos.presentation.tecnico
 
-import androidx.lifecycle.AbstractSavedStateViewModelFactory
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ucne.registro_tecnicos.data.local.entities.TecnicoEntity
 import com.ucne.registro_tecnicos.data.repository.TecnicoRepository
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class TecnicoViewModel(private val repository: TecnicoRepository) : ViewModel() {
+class TecnicoViewModel(private val repository: TecnicoRepository, private val tecnicoId: Int)
+    : ViewModel() {
+    var uiState = MutableStateFlow(TecnicoUIState())
+        private set
+
+    init{
+        viewModelScope.launch {
+            val tecnico = repository.getTecnico(tecnicoId)
+
+            tecnico?.let {
+                uiState.update {
+                    it.copy(
+                        tecnicoId = tecnico.tecnicoId ?: 0,
+                        nombre = tecnico.nombre ?: "",
+                        sueldoHora = tecnico.sueldoHora ?: 0.0
+                    )
+                }
+            }
+        }
+    }
+
+    fun onNombreChanged(nombre: String){
+        val regex = Regex("[a-zA-Z ]*")
+        if (nombre.matches(regex) && !nombre.startsWith(" ")) {
+            uiState.update {
+                it.copy(nombre = nombre)
+            }
+        }
+    }
+    fun onSueldoHoraChanged(sueldoHoraStr: String) {
+        val regex = Regex("[0-9]*\\.?[0-9]{0,2}")
+        if (sueldoHoraStr.matches(regex)) {
+            val sueldoHora = if(sueldoHoraStr == "") null else sueldoHoraStr.toDoubleOrNull() ?: 0.0
+            uiState.update {
+                it.copy(
+                    sueldoHora = sueldoHora,
+                )
+            }
+        }
+    }
 
     val tecnicos = repository.getTecnicos()
         .stateIn(
@@ -19,33 +58,34 @@ class TecnicoViewModel(private val repository: TecnicoRepository) : ViewModel() 
             initialValue = emptyList()
         )
 
-    fun saveTecnico(tecnico: TecnicoEntity) {
+    fun saveTecnico() {
         viewModelScope.launch {
-            repository.saveTecnico(tecnico)
+            repository.saveTecnico(uiState.value.toEntity())
         }
     }
-    fun deleteTecnico(tecnico: TecnicoEntity) {
+    fun deleteTecnico() {
         viewModelScope.launch {
-            repository.deleteTecnico(tecnico)
+            repository.deleteTecnico(uiState.value.toEntity())
         }
     }
     fun nombreExists(nombre: String, id: Int?): Boolean {
         return tecnicos.value.any { it.nombre?.replace(" ", "")?.uppercase() == nombre.replace(" ", "").uppercase() && it.tecnicoId != id }
     }
 
-    companion object {
-        fun provideFactory(
-            repository: TecnicoRepository
-        ): AbstractSavedStateViewModelFactory =
-            object : AbstractSavedStateViewModelFactory() {
-                @Suppress("UNCHECKED_CAST")
-                override fun <T : ViewModel> create(
-                    key: String,
-                    modelClass: Class<T>,
-                    handle: SavedStateHandle
-                ): T {
-                    return TecnicoViewModel(repository) as T
-                }
-            }
-    }
+}
+
+data class TecnicoUIState(
+    val tecnicoId: Int = 0,
+    var nombre: String = "",
+    var nombreError: String? = null,
+    var sueldoHora: Double? = 0.0,
+    var sueldoHoraError: String? = null,
+)
+
+fun TecnicoUIState.toEntity(): TecnicoEntity {
+    return TecnicoEntity(
+        tecnicoId = tecnicoId,
+        nombre = nombre,
+        sueldoHora = sueldoHora
+    )
 }
