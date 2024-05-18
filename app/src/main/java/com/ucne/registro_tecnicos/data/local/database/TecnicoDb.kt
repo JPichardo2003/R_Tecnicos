@@ -12,7 +12,7 @@ import com.ucne.registro_tecnicos.data.local.entities.TipoTecnicoEntity
         TecnicoEntity::class,
         TipoTecnicoEntity::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 

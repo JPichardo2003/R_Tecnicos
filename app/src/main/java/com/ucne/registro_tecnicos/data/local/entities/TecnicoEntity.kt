@@ -7,5 +7,6 @@ data class TecnicoEntity(
     @PrimaryKey
     val tecnicoId: Int? = null,
     var nombre: String? = "",
-    var sueldoHora: Double? = 0.0
+    var sueldoHora: Double? = 0.0,
+    var tipo: String? = ""
 )

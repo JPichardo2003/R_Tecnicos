@@ -49,7 +49,7 @@ class MainActivity : ComponentActivity() {
                 ) {
                     composable<Screen.TecnicoList>{
                         TecnicoListScreen(
-                            viewModel = viewModel { TecnicoViewModel(repository, 0)},
+                            viewModel = viewModel { TecnicoViewModel(repository, tipoRepository,0)},
                             onVerTecnico = {
                                 navController.navigate(Screen.Tecnico(it.tecnicoId ?: 0))
                             },
@@ -62,7 +62,7 @@ class MainActivity : ComponentActivity() {
                     composable<Screen.Tecnico> {
                         val args = it.toRoute<Screen.Tecnico>()
                         TecnicoScreen(
-                            viewModel = viewModel { TecnicoViewModel(repository, args.tecnicoId) },
+                            viewModel = viewModel { TecnicoViewModel(repository, tipoRepository, args.tecnicoId) },
                             navController = navController
                         )
                     }

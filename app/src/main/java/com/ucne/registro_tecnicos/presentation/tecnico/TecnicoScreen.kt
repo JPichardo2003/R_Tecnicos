@@ -40,6 +40,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.ucne.registro_tecnicos.R
 import com.ucne.registro_tecnicos.Screen
+import com.ucne.registro_tecnicos.data.local.entities.TipoTecnicoEntity
+import com.ucne.registro_tecnicos.presentation.components.DropDownInput
 import com.ucne.registro_tecnicos.presentation.components.NavigationDrawer
 import com.ucne.registro_tecnicos.presentation.components.Notification
 import com.ucne.registro_tecnicos.ui.theme.Registro_TecnicosTheme
@@ -50,12 +52,15 @@ fun TecnicoScreen(
     navController: NavHostController
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val tipos by viewModel.tipos.collectAsStateWithLifecycle(emptyList())
     NavigationDrawer(navController = navController){
         TecnicoBody(
             uiState = uiState,
             navController = navController,
+            tipos = tipos,
             onNombreChanged = viewModel::onNombreChanged,
             onSueldoHoraChanged = viewModel::onSueldoHoraChanged,
+            onTipoSelected = viewModel::onTipoSelected,
             onSaveTecnico = {
                 viewModel.saveTecnico()
             },
@@ -72,16 +77,20 @@ var nombreVacio by mutableStateOf(false)
 var nombreExtenso by mutableStateOf(false)
 var nombreRepetido by mutableStateOf(false)
 var sueldoHoraNoValido by mutableStateOf(false)
+var sinTipo by mutableStateOf(false)
 @Composable
 fun TecnicoBody(
     uiState: TecnicoUIState,
+    tipos: List<TipoTecnicoEntity>,
     onNombreChanged: (String) -> Unit,
     onSueldoHoraChanged: (String) -> Unit,
+    onTipoSelected: (String) -> Unit,
     onNombreExist: (String, Int?) -> Boolean,
     onSaveTecnico: () -> Unit,
     onDeleteTecnico: () -> Unit,
     navController: NavHostController
 ) {
+    var selectedTipo by remember { mutableStateOf<TipoTecnicoEntity?>(null) }
     Scaffold(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
@@ -168,6 +177,25 @@ fun TecnicoBody(
                             fontSize = 14.sp
                         )
                     }
+
+                    DropDownInput(
+                        items = tipos,
+                        label = "Tipos Técnico",
+                        itemToString = { it.descripcion ?: "" },
+                        onItemSelected = {
+                            selectedTipo = it
+                            onTipoSelected(it.descripcion ?: "")
+                        },
+                        selectedItem = uiState.tipo ?: "",
+                    )
+                    if(sinTipo){
+                        Text(
+                            text = "Campo Obligatorio.",
+                            color = Color.Red,
+                            fontStyle = FontStyle.Italic
+                        )
+                    }
+
                     Spacer(modifier = Modifier.padding(2.dp))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -180,6 +208,7 @@ fun TecnicoBody(
                                 nombreVacio = false
                                 nombreExtenso = false
                                 sueldoHoraNoValido = false
+                                sinTipo = false
                             }
                         ) {
                             Icon(
@@ -192,7 +221,7 @@ fun TecnicoBody(
                         }
                         OutlinedButton(
                             onClick = {
-                                if (validar(uiState.nombre,uiState.sueldoHora) && !onNombreExist(uiState.nombre, uiState.tecnicoId)) {
+                                if (validar(uiState.nombre,uiState.sueldoHora,uiState.tipo) && !onNombreExist(uiState.nombre, uiState.tecnicoId)) {
                                     onSaveTecnico()
                                     uiState.nombre = ""
                                     uiState.sueldoHora = null
@@ -200,6 +229,7 @@ fun TecnicoBody(
                                     nombreVacio = false
                                     nombreExtenso = false
                                     sueldoHoraNoValido = false
+                                    sinTipo = false
                                     navController.navigate(Screen.TecnicoList)
                                 }
                                 else{ errorGuardar = true}
@@ -278,11 +308,12 @@ fun TecnicoBody(
         }
     }
 }
-private fun validar(nombre: String, sueldoHora: Double?) : Boolean {
+private fun validar(nombre: String, sueldoHora: Double?, tipo: String) : Boolean {
     nombreVacio = nombre.isEmpty()
     nombreExtenso = nombre.length > 30
     sueldoHoraNoValido = (sueldoHora ?: 0.0) <= 0.0
-    return !nombreExtenso && !nombreVacio && !sueldoHoraNoValido
+    sinTipo = tipo.isEmpty()
+    return !nombreExtenso && !nombreVacio && !sueldoHoraNoValido && !sinTipo
 }
 @Preview
 @Composable
@@ -292,9 +323,11 @@ private fun TecnicoPreview() {
             uiState = TecnicoUIState(),
             onNombreChanged =  {},
             onSueldoHoraChanged = {},
+            onTipoSelected = {},
             onNombreExist = { _, _ -> false },
             onSaveTecnico = {},
             onDeleteTecnico = {},
+            tipos = emptyList(),
             navController = NavHostController(LocalContext.current)
         )
     }

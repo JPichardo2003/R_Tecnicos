@@ -74,6 +74,7 @@ fun TecnicoListBody(
                 Text(text = "ID", modifier = Modifier.weight(0.06f))
                 Text(text = "Nombre", modifier = Modifier.weight(0.200f))
                 Text(text = "SueldoHora", modifier = Modifier.weight(0.25f))
+                Text(text = "Tipo", modifier = Modifier.weight(0.25f))
                 //Spacer(modifier = Modifier.weight(0.05f)) // Espacio adicional para el icono de basura
             }
 
@@ -92,8 +93,9 @@ fun TecnicoListBody(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(text = tecnico.tecnicoId.toString(), modifier = Modifier.weight(0.10f))
-                        Text(text = tecnico.nombre.toString(), modifier = Modifier.weight(0.370f))
+                        Text(text = tecnico.nombre.toString(), modifier = Modifier.weight(0.300f))
                         Text(text = tecnico.sueldoHora.toString(), modifier = Modifier.weight(0.30f))
+                        Text(text = tecnico.tipo.toString(), modifier = Modifier.weight(0.30f))
 
                         /*IconButton(
                             onClick = { tecnicoToDelete = tecnico

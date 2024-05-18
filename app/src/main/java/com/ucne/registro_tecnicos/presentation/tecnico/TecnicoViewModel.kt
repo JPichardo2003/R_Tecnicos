@@ -4,16 +4,28 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ucne.registro_tecnicos.data.local.entities.TecnicoEntity
 import com.ucne.registro_tecnicos.data.repository.TecnicoRepository
+import com.ucne.registro_tecnicos.data.repository.TipoTecnicoRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class TecnicoViewModel(private val repository: TecnicoRepository, private val tecnicoId: Int)
+class TecnicoViewModel(
+    private val repository: TecnicoRepository,
+    tipoRepository: TipoTecnicoRepository,
+    private val tecnicoId: Int
+)
     : ViewModel() {
     var uiState = MutableStateFlow(TecnicoUIState())
         private set
+
+    val tipos = tipoRepository.getTiposTecnicos()
+        .stateIn(
+            viewModelScope,
+            SharingStarted.Lazily,
+            emptyList()
+        )
 
     init{
         viewModelScope.launch {
@@ -24,7 +36,8 @@ class TecnicoViewModel(private val repository: TecnicoRepository, private val te
                     it.copy(
                         tecnicoId = tecnico.tecnicoId,
                         nombre = tecnico.nombre ?: "",
-                        sueldoHora = tecnico.sueldoHora
+                        sueldoHora = tecnico.sueldoHora,
+                        tipo = tecnico.tipo ?: ""
                     )
                 }
             }
@@ -49,6 +62,9 @@ class TecnicoViewModel(private val repository: TecnicoRepository, private val te
                 )
             }
         }
+    }
+    fun onTipoSelected(tipo: String) {
+        uiState.value = uiState.value.copy(tipo = tipo)
     }
 
     val tecnicos = repository.getTecnicos()
@@ -79,12 +95,14 @@ data class TecnicoUIState(
     var nombreError: String? = null,
     var sueldoHora: Double? = null,
     var sueldoHoraError: String? = null,
+    var tipo: String = ""
 )
 
 fun TecnicoUIState.toEntity(): TecnicoEntity {
     return TecnicoEntity(
         tecnicoId = tecnicoId,
         nombre = nombre,
-        sueldoHora = sueldoHora
+        sueldoHora = sueldoHora,
+        tipo = tipo
     )
 }
