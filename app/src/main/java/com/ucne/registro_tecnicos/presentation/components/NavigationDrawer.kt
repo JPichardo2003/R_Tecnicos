@@ -74,10 +74,11 @@ fun NavigationDrawer(
                         },
                         selected = item == selectedItem.value,
                         onClick = {
-                            scope.launch { drawerState.close() }
                             selectedItem.value = item
+                            scope.launch { drawerState.close() }
                             when (item.title) {
                                 "TecnicoListScreen" -> navController.navigate(Screen.TecnicoList)
+                                "TipoListScreen" -> navController.navigate(Screen.TipoTecnicoList)
                             }
                         },
                         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)

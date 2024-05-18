@@ -14,9 +14,13 @@ import androidx.navigation.toRoute
 import androidx.room.Room
 import com.ucne.registro_tecnicos.data.local.database.TecnicoDb
 import com.ucne.registro_tecnicos.data.repository.TecnicoRepository
+import com.ucne.registro_tecnicos.data.repository.TipoTecnicoRepository
 import com.ucne.registro_tecnicos.presentation.tecnico.TecnicoListScreen
 import com.ucne.registro_tecnicos.presentation.tecnico.TecnicoScreen
 import com.ucne.registro_tecnicos.presentation.tecnico.TecnicoViewModel
+import com.ucne.registro_tecnicos.presentation.tipoTecnico.TipoTecnicoListScreen
+import com.ucne.registro_tecnicos.presentation.tipoTecnico.TipoTecnicoScreen
+import com.ucne.registro_tecnicos.presentation.tipoTecnico.TipoTecnicoViewModel
 import com.ucne.registro_tecnicos.ui.theme.Registro_TecnicosTheme
 import kotlinx.serialization.Serializable
 
@@ -34,6 +38,7 @@ class MainActivity : ComponentActivity() {
             .build()
 
         val repository = TecnicoRepository(tecnicoDb.tecnicoDao())
+        val tipoRepository = TipoTecnicoRepository(tecnicoDb.tipoTecnicoDao())
         enableEdgeToEdge()
         setContent {
             Registro_TecnicosTheme {
@@ -58,6 +63,25 @@ class MainActivity : ComponentActivity() {
                         val args = it.toRoute<Screen.Tecnico>()
                         TecnicoScreen(
                             viewModel = viewModel { TecnicoViewModel(repository, args.tecnicoId) },
+                            navController = navController
+                        )
+                    }
+                    composable<Screen.TipoTecnicoList> {
+                        TipoTecnicoListScreen(
+                            viewModel = viewModel { TipoTecnicoViewModel(tipoRepository,0) },
+                            onVerTipoTecnico = {
+                                navController.navigate(Screen.TipoTecnico(it.tipoId ?: 0))
+                            },
+                            onAddTipoTecnico = {
+                                navController.navigate(Screen.TipoTecnico(0))
+                            },
+                            navController = navController
+                        )
+                    }
+                    composable<Screen.TipoTecnico> {
+                        val args = it.toRoute<Screen.TipoTecnico>()
+                        TipoTecnicoScreen(
+                            viewModel = viewModel { TipoTecnicoViewModel(tipoRepository, args.tipoId) },
                             navController = navController
                         )
                     }
@@ -94,6 +118,10 @@ sealed class Screen {
     object TecnicoList : Screen()
     @Serializable
     data class Tecnico(val tecnicoId: Int) : Screen()
+    @Serializable
+    object TipoTecnicoList : Screen()
+    @Serializable
+    data class TipoTecnico(val tipoId: Int) : Screen()
 }
 
 @Preview(showBackground = true)
