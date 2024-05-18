@@ -1,6 +1,5 @@
 package com.ucne.registro_tecnicos.presentation.tecnico
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -38,28 +37,36 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
 import com.ucne.registro_tecnicos.R
+import com.ucne.registro_tecnicos.Screen
+import com.ucne.registro_tecnicos.presentation.components.NavigationDrawer
+import com.ucne.registro_tecnicos.presentation.components.Notification
 import com.ucne.registro_tecnicos.ui.theme.Registro_TecnicosTheme
 
 @Composable
 fun TecnicoScreen(
-    viewModel: TecnicoViewModel
+    viewModel: TecnicoViewModel,
+    navController: NavHostController
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    TecnicoBody(
-        uiState = uiState,
-        onNombreChanged = viewModel::onNombreChanged,
-        onSueldoHoraChanged = viewModel::onSueldoHoraChanged,
-        onSaveTecnico = {
-            viewModel.saveTecnico()
-        },
-        onDeleteTecnico = {
-            viewModel.deleteTecnico()
-        },
-        onNombreExist = {nombre, id: Int? ->
-            viewModel.nombreExists(nombre, id)
-        }
-    )
+    NavigationDrawer(navController = navController){
+        TecnicoBody(
+            uiState = uiState,
+            navController = navController,
+            onNombreChanged = viewModel::onNombreChanged,
+            onSueldoHoraChanged = viewModel::onSueldoHoraChanged,
+            onSaveTecnico = {
+                viewModel.saveTecnico()
+            },
+            onDeleteTecnico = {
+                viewModel.deleteTecnico()
+            },
+            onNombreExist = {nombre, id: Int? ->
+                viewModel.nombreExists(nombre, id)
+            }
+        )
+    }
 }
 var nombreVacio by mutableStateOf(false)
 var nombreExtenso by mutableStateOf(false)
@@ -68,11 +75,12 @@ var sueldoHoraNoValido by mutableStateOf(false)
 @Composable
 fun TecnicoBody(
     uiState: TecnicoUIState,
-    onNombreChanged: (String)->Unit,
-    onSueldoHoraChanged: (String)->Unit,
+    onNombreChanged: (String) -> Unit,
+    onSueldoHoraChanged: (String) -> Unit,
     onNombreExist: (String, Int?) -> Boolean,
     onSaveTecnico: () -> Unit,
-    onDeleteTecnico: () -> Unit
+    onDeleteTecnico: () -> Unit,
+    navController: NavHostController
 ) {
     Scaffold(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -186,10 +194,13 @@ fun TecnicoBody(
                             onClick = {
                                 if (validar(uiState.nombre,uiState.sueldoHora) && !onNombreExist(uiState.nombre, uiState.tecnicoId)) {
                                     onSaveTecnico()
+                                    uiState.nombre = ""
+                                    uiState.sueldoHora = null
                                     guardo = true
                                     nombreVacio = false
                                     nombreExtenso = false
                                     sueldoHoraNoValido = false
+                                    navController.navigate(Screen.TecnicoList)
                                 }
                                 else{ errorGuardar = true}
                             }
@@ -203,10 +214,15 @@ fun TecnicoBody(
 
                         OutlinedButton(
                             onClick = {
-                                showDialog = true
-                                nombreVacio = false
-                                nombreExtenso = false
-                                sueldoHoraNoValido = false
+                                if(uiState.tecnicoId != null){
+                                    showDialog = true
+                                    nombreVacio = false
+                                    nombreExtenso = false
+                                    sueldoHoraNoValido = false
+                                }else{
+                                    errorEliminar = true
+                                }
+
                             }
                         ) {
                             Icon(
@@ -244,6 +260,7 @@ fun TecnicoBody(
                                         onDeleteTecnico()
                                         showDialog = false
                                         elimino = true
+                                        navController.navigate(Screen.TecnicoList)
                                     }
                                 ) {
                                     Text("Sí")
@@ -261,10 +278,6 @@ fun TecnicoBody(
         }
     }
 }
-@Composable
-fun Notification(message: String) {
-    Toast.makeText(LocalContext.current, message, Toast.LENGTH_LONG).show()
-}
 private fun validar(nombre: String, sueldoHora: Double?) : Boolean {
     nombreVacio = nombre.isEmpty()
     nombreExtenso = nombre.length > 30
@@ -277,11 +290,12 @@ private fun TecnicoPreview() {
     Registro_TecnicosTheme {
         TecnicoBody(
             uiState = TecnicoUIState(),
-            onSaveTecnico = {},
-            onDeleteTecnico = {},
             onNombreChanged =  {},
             onSueldoHoraChanged = {},
-            onNombreExist = { _, _ -> false }
+            onNombreExist = { _, _ -> false },
+            onSaveTecnico = {},
+            onDeleteTecnico = {},
+            navController = NavHostController(LocalContext.current)
         )
     }
 }

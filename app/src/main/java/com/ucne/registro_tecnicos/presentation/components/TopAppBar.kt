@@ -22,7 +22,7 @@ fun TopAppBar(title: String) {
             )
         },
         navigationIcon = {
-            IconButton(onClick = { /* doSomething() */ }) {
+            IconButton(onClick = {/* doSomething() */ }) {
                 Icon(
                     imageVector = Icons.Filled.Menu,
                     contentDescription = "Localized description"

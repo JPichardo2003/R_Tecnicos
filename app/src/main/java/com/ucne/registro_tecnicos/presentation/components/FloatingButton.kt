@@ -7,10 +7,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 
 @Composable
-fun FloatingButton(onAddTecnico: () -> Unit) {
+fun FloatingButton(onAddEntity: () -> Unit) {
     FloatingActionButton(
-        onClick = onAddTecnico
+        onClick = onAddEntity
     ) {
-        Icon(Icons.Filled.Add, "Agregar Tecnico")
+        Icon(Icons.Filled.Add, "Agregar nueva entidad")
     }
 }

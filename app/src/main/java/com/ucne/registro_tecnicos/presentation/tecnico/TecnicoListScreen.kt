@@ -18,8 +18,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
 import com.ucne.registro_tecnicos.data.local.entities.TecnicoEntity
 import com.ucne.registro_tecnicos.presentation.components.FloatingButton
+import com.ucne.registro_tecnicos.presentation.components.NavigationDrawer
 import com.ucne.registro_tecnicos.presentation.components.TopAppBar
 import com.ucne.registro_tecnicos.ui.theme.Registro_TecnicosTheme
 
@@ -27,15 +29,19 @@ import com.ucne.registro_tecnicos.ui.theme.Registro_TecnicosTheme
 fun TecnicoListScreen(
     viewModel: TecnicoViewModel,
     onVerTecnico: (TecnicoEntity) -> Unit,
-    onAddTecnico: () -> Unit
+    onAddTecnico: () -> Unit,
+    navController: NavHostController
 ) {
     val tecnicos by viewModel.tecnicos.collectAsStateWithLifecycle()
-    TecnicoListBody(
-        tecnicos = tecnicos,
-        onVerTecnico = onVerTecnico,
-        onAddTecnico = onAddTecnico
-        //onDeleteTecnico = {}
-    )
+    NavigationDrawer(navController = navController){
+        TecnicoListBody(
+            tecnicos = tecnicos,
+            onVerTecnico = onVerTecnico,
+            onAddTecnico = onAddTecnico
+            //onDeleteTecnico = {}
+        )
+    }
+
 }
 @Composable
 fun TecnicoListBody(
@@ -44,10 +50,11 @@ fun TecnicoListBody(
     onAddTecnico: () -> Unit
     //onDeleteTecnico: (TecnicoEntity) -> Unit
 ) {
-    Scaffold(modifier = Modifier.fillMaxSize(),
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
         topBar = { TopAppBar(title = "Tecnicos") },
         floatingActionButton = { FloatingButton(onAddTecnico) }
-        )
+    )
     {
         /*var showDialog by remember { mutableStateOf(false) }
         var tecnicoToDelete by remember { mutableStateOf<TecnicoEntity?>(null) }

@@ -22,9 +22,9 @@ class TecnicoViewModel(private val repository: TecnicoRepository, private val te
             tecnico?.let {
                 uiState.update {
                     it.copy(
-                        tecnicoId = tecnico.tecnicoId ?: 0,
+                        tecnicoId = tecnico.tecnicoId,
                         nombre = tecnico.nombre ?: "",
-                        sueldoHora = tecnico.sueldoHora ?: 0.0
+                        sueldoHora = tecnico.sueldoHora
                     )
                 }
             }
@@ -71,14 +71,13 @@ class TecnicoViewModel(private val repository: TecnicoRepository, private val te
     fun nombreExists(nombre: String, id: Int?): Boolean {
         return tecnicos.value.any { it.nombre?.replace(" ", "")?.uppercase() == nombre.replace(" ", "").uppercase() && it.tecnicoId != id }
     }
-
 }
 
 data class TecnicoUIState(
-    val tecnicoId: Int = 0,
+    val tecnicoId: Int? = null,
     var nombre: String = "",
     var nombreError: String? = null,
-    var sueldoHora: Double? = 0.0,
+    var sueldoHora: Double? = null,
     var sueldoHoraError: String? = null,
 )
 
