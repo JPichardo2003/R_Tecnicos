@@ -51,7 +51,7 @@ fun TipoTecnicoListBody(
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        topBar = { TopAppBar(title = "Tipos Tecnicos") },
+        topBar = { TopAppBar(title = "Tipos Técnicos") },
         floatingActionButton = { FloatingButton(onAddTipoTecnico) }
     )
     {

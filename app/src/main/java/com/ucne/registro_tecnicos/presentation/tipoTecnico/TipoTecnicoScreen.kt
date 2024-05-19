@@ -38,6 +38,7 @@ import androidx.navigation.NavHostController
 import com.ucne.registro_tecnicos.Screen
 import com.ucne.registro_tecnicos.presentation.components.NavigationDrawer
 import com.ucne.registro_tecnicos.presentation.components.Notification
+import com.ucne.registro_tecnicos.presentation.components.TopAppBar
 import com.ucne.registro_tecnicos.ui.theme.Registro_TecnicosTheme
 
 @Composable
@@ -74,7 +75,10 @@ fun TipoTecnicoBody(
     onDeleteTipoTecnico: () -> Unit,
     navController: NavHostController
 ) {
-    Scaffold(modifier = Modifier.fillMaxSize()) {
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        topBar = { TopAppBar("Registro TipoTécnicos") }
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()

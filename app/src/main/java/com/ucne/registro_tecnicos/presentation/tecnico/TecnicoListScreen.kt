@@ -52,7 +52,7 @@ fun TecnicoListBody(
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        topBar = { TopAppBar(title = "Tecnicos") },
+        topBar = { TopAppBar(title = "Técnicos") },
         floatingActionButton = { FloatingButton(onAddTecnico) }
     )
     {
@@ -71,8 +71,8 @@ fun TecnicoListBody(
                     .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = "ID", modifier = Modifier.weight(0.06f))
-                Text(text = "Nombre", modifier = Modifier.weight(0.200f))
+                Text(text = "ID", modifier = Modifier.weight(0.10f))
+                Text(text = "Nombre", modifier = Modifier.weight(0.220f))
                 Text(text = "SueldoHora", modifier = Modifier.weight(0.25f))
                 Text(text = "Tipo", modifier = Modifier.weight(0.25f))
                 //Spacer(modifier = Modifier.weight(0.05f)) // Espacio adicional para el icono de basura
@@ -92,9 +92,9 @@ fun TecnicoListBody(
                             .padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(text = tecnico.tecnicoId.toString(), modifier = Modifier.weight(0.10f))
+                        Text(text = tecnico.tecnicoId.toString(), modifier = Modifier.weight(0.12f))
                         Text(text = tecnico.nombre.toString(), modifier = Modifier.weight(0.300f))
-                        Text(text = tecnico.sueldoHora.toString(), modifier = Modifier.weight(0.30f))
+                        Text(text = tecnico.sueldoHora.toString(), modifier = Modifier.weight(0.25f))
                         Text(text = tecnico.tipo.toString(), modifier = Modifier.weight(0.30f))
 
                         /*IconButton(
@@ -147,7 +147,8 @@ private fun TecnicoListPreview() {
         TecnicoEntity(
             tecnicoId = 1,
             nombre = "Julio Pichardo",
-            sueldoHora = 54.0
+            sueldoHora = 54.0,
+            tipo = "Tecnico"
         )
     )
     Registro_TecnicosTheme {

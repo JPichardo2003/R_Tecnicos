@@ -40,21 +40,19 @@ fun NavigationDrawer(
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-
     val items = listOf(
         NavigationItem(
-        title = "TecnicoListScreen",
+        title = "TécnicoListScreen",
         selectedIcon = Icons.Filled.AccountCircle,
         unselectedIcon = Icons.Outlined.AccountCircle
         ),
         NavigationItem(
-            title = "TipoListScreen",
+            title = "TipoTécnicoListScreen",
             selectedIcon = Icons.Filled.Info,
             unselectedIcon = Icons.Outlined.Info
         )
     )
     val selectedItem = remember { mutableStateOf(items[0]) }
-
     ModalNavigationDrawer(
         drawerContent = {
             ModalDrawerSheet {
@@ -77,8 +75,8 @@ fun NavigationDrawer(
                             selectedItem.value = item
                             scope.launch { drawerState.close() }
                             when (item.title) {
-                                "TecnicoListScreen" -> navController.navigate(Screen.TecnicoList)
-                                "TipoListScreen" -> navController.navigate(Screen.TipoTecnicoList)
+                                "TécnicoListScreen" -> navController.navigate(Screen.TecnicoList)
+                                "TipoTécnicoListScreen" -> navController.navigate(Screen.TipoTecnicoList)
                             }
                         },
                         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)

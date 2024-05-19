@@ -27,6 +27,13 @@ class TecnicoViewModel(
             emptyList()
         )
 
+    val tecnicos = repository.getTecnicos()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = emptyList()
+        )
+
     init{
         viewModelScope.launch {
             val tecnico = repository.getTecnico(tecnicoId)
@@ -66,13 +73,6 @@ class TecnicoViewModel(
     fun onTipoSelected(tipo: String) {
         uiState.value = uiState.value.copy(tipo = tipo)
     }
-
-    val tecnicos = repository.getTecnicos()
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = emptyList()
-        )
 
     fun saveTecnico() {
         viewModelScope.launch {

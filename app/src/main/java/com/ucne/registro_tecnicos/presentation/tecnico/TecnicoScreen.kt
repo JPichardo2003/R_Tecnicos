@@ -44,6 +44,7 @@ import com.ucne.registro_tecnicos.data.local.entities.TipoTecnicoEntity
 import com.ucne.registro_tecnicos.presentation.components.DropDownInput
 import com.ucne.registro_tecnicos.presentation.components.NavigationDrawer
 import com.ucne.registro_tecnicos.presentation.components.Notification
+import com.ucne.registro_tecnicos.presentation.components.TopAppBar
 import com.ucne.registro_tecnicos.ui.theme.Registro_TecnicosTheme
 
 @Composable
@@ -91,7 +92,10 @@ fun TecnicoBody(
     navController: NavHostController
 ) {
     var selectedTipo by remember { mutableStateOf<TipoTecnicoEntity?>(null) }
-    Scaffold(modifier = Modifier.fillMaxSize()) {
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        topBar = { TopAppBar("Registro Técnicos")}
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -205,6 +209,7 @@ fun TecnicoBody(
                             onClick = {
                                 onNombreChanged("")
                                 onSueldoHoraChanged("")
+                                onTipoSelected("")
                                 nombreVacio = false
                                 nombreExtenso = false
                                 sueldoHoraNoValido = false
@@ -290,6 +295,7 @@ fun TecnicoBody(
                                         onDeleteTecnico()
                                         showDialog = false
                                         elimino = true
+                                        sinTipo = false
                                         navController.navigate(Screen.TecnicoList)
                                     }
                                 ) {
