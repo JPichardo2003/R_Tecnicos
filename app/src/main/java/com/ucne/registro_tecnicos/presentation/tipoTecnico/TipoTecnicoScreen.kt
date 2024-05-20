@@ -47,6 +47,7 @@ fun TipoTecnicoScreen(
     navController: NavHostController
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val tipos by viewModel.tipoTecnicos.collectAsStateWithLifecycle()
     NavigationDrawer(navController = navController){
         TipoTecnicoBody(
             uiState = uiState,
@@ -117,7 +118,7 @@ fun TipoTecnicoBody(
                     descripcionRepetido = onDescripcionExist(uiState.descripcion, uiState.tipoId)
                     if(descripcionRepetido){
                         Text(
-                            text = "Tipo Tecnico ya existe.",
+                            text = "Tipo Técnico ya existe.",
                             color = Color.Red,
                             fontStyle = FontStyle.Italic,
                             fontSize = 14.sp

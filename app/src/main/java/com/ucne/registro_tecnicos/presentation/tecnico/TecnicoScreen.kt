@@ -54,6 +54,8 @@ fun TecnicoScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val tipos by viewModel.tipos.collectAsStateWithLifecycle(emptyList())
+    val tecnicos by viewModel.tecnicos.collectAsStateWithLifecycle()
+
     NavigationDrawer(navController = navController){
         TecnicoBody(
             uiState = uiState,
@@ -296,6 +298,9 @@ fun TecnicoBody(
                                         onDeleteTecnico()
                                         showDialog = false
                                         elimino = true
+                                        nombreVacio = false
+                                        nombreExtenso = false
+                                        sueldoHoraNoValido = false
                                         sinTipo = false
                                         navController.navigate(Screen.TecnicoList)
                                     }
