@@ -87,28 +87,6 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
-                /*Surface {
-                    val viewModel: TecnicoViewModel = viewModel(
-                        factory = TecnicoViewModel.provideFactory(repository)
-                    )
-                    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-
-                        Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(innerPadding)
-                                .padding(8.dp)
-                        ) {
-
-                            TecnicoScreen(viewModel = viewModel)
-                            TecnicoListScreen(viewModel = viewModel,
-                                onVerTecnico = {
-                                }
-                            )
-                        }
-                    }
-                }
-            }*/
         }
     }
 }

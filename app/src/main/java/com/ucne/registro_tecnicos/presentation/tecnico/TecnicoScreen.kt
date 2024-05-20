@@ -57,8 +57,8 @@ fun TecnicoScreen(
     NavigationDrawer(navController = navController){
         TecnicoBody(
             uiState = uiState,
-            navController = navController,
             tipos = tipos,
+            navController = navController,
             onNombreChanged = viewModel::onNombreChanged,
             onSueldoHoraChanged = viewModel::onSueldoHoraChanged,
             onTipoSelected = viewModel::onTipoSelected,
@@ -68,7 +68,7 @@ fun TecnicoScreen(
             onDeleteTecnico = {
                 viewModel.deleteTecnico()
             },
-            onNombreExist = {nombre, id: Int? ->
+            onNombreExist = {nombre: String, id: Int? ->
                 viewModel.nombreExists(nombre, id)
             }
         )
@@ -134,7 +134,7 @@ fun TecnicoBody(
                     nombreRepetido = onNombreExist(uiState.nombre, uiState.tecnicoId)
                     if(nombreRepetido){
                         Text(
-                            text = "Nombre ya existe.",
+                            text = "Nombre de técnico ya existe.",
                             color = Color.Red,
                             fontStyle = FontStyle.Italic,
                             fontSize = 14.sp
@@ -228,8 +228,9 @@ fun TecnicoBody(
                             onClick = {
                                 if (validar(uiState.nombre,uiState.sueldoHora,uiState.tipo) && !onNombreExist(uiState.nombre, uiState.tecnicoId)) {
                                     onSaveTecnico()
-                                    uiState.nombre = ""
-                                    uiState.sueldoHora = null
+                                    onNombreChanged("")
+                                    onSueldoHoraChanged("")
+                                    onTipoSelected("")
                                     guardo = true
                                     nombreVacio = false
                                     nombreExtenso = false
@@ -287,8 +288,8 @@ fun TecnicoBody(
                     if (showDialog) {
                         AlertDialog(
                             onDismissRequest = { showDialog = false },
-                            title = { Text("Eliminar Tecnico") },
-                            text = { Text("¿Está seguro de que desea eliminar este tecnico?") },
+                            title = { Text("Eliminar Técnico") },
+                            text = { Text("¿Está seguro de que desea eliminar este técnico?") },
                             confirmButton = {
                                 Button(
                                     onClick = {

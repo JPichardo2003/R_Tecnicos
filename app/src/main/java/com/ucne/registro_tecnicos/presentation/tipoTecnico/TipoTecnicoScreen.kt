@@ -213,8 +213,8 @@ fun TipoTecnicoBody(
                     if (showDialog) {
                         AlertDialog(
                             onDismissRequest = { showDialog = false },
-                            title = { Text("Eliminar Tipo Tecnico") },
-                            text = { Text("¿Está seguro de que desea eliminar este tipo tecnico?") },
+                            title = { Text("Eliminar Tipo Técnico") },
+                            text = { Text("¿Está seguro de que desea eliminar este tipo técnico?") },
                             confirmButton = {
                                 Button(
                                     onClick = {
