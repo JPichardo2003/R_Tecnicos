@@ -52,7 +52,7 @@ class TecnicoViewModel(
     }
 
     fun onNombreChanged(nombre: String){
-        val regex = Regex("[a-zA-Z ]*")
+        val regex = Regex("[\\p{L} ]*")
         if (nombre.matches(regex) && !nombre.startsWith(" ")) {
             uiState.update {
                 it.copy(nombre = nombre)
@@ -70,13 +70,16 @@ class TecnicoViewModel(
             }
         }
     }
-    fun onTipoSelected(tipo: String) {
-        uiState.value = uiState.value.copy(tipo = tipo)
+    fun onTipoTecnicoChanged(tipo: String) {
+        uiState.update {
+            it.copy(tipo = tipo)
+        }
     }
 
     fun saveTecnico() {
         viewModelScope.launch {
             repository.saveTecnico(uiState.value.toEntity())
+            newTecnico()
         }
     }
     fun deleteTecnico() {
@@ -84,18 +87,40 @@ class TecnicoViewModel(
             repository.deleteTecnico(uiState.value.toEntity())
         }
     }
-    fun nombreExists(nombre: String, id: Int?): Boolean {
+    fun newTecnico() {
+        viewModelScope.launch {
+            uiState.value = TecnicoUIState()
+        }
+    }
+    private fun nombreExists(nombre: String, id: Int?): Boolean {
         return tecnicos.value.any { it.nombre?.replace(" ", "")?.uppercase() == nombre.replace(" ", "").uppercase() && it.tecnicoId != id }
+    }
+    fun validation(): Boolean {
+        uiState.value.nombreEmpty = (uiState.value.nombre.isEmpty())
+        uiState.value.sueldoHoraEmpty = ((uiState.value.sueldoHora ?: 0.0) <= 0.0)
+        uiState.value.tipoEmpty = (uiState.value.tipo.isEmpty())
+        uiState.value.nombreRepetido = nombreExists(uiState.value.nombre, uiState.value.tecnicoId)
+        uiState.update {
+            it.copy( saveSuccess =  !uiState.value.nombreEmpty &&
+                    !uiState.value.sueldoHoraEmpty &&
+                    !uiState.value.tipoEmpty &&
+                    !uiState.value.nombreRepetido
+            )
+        }
+        return uiState.value.saveSuccess
     }
 }
 
 data class TecnicoUIState(
     val tecnicoId: Int? = null,
     var nombre: String = "",
-    var nombreError: String? = null,
+    var nombreEmpty: Boolean = false,
+    var nombreRepetido: Boolean = false,
     var sueldoHora: Double? = null,
-    var sueldoHoraError: String? = null,
-    var tipo: String = ""
+    var sueldoHoraEmpty: Boolean = false,
+    var tipo: String = "",
+    var tipoEmpty: Boolean = false,
+    var saveSuccess: Boolean = false,
 )
 
 fun TecnicoUIState.toEntity(): TecnicoEntity {

@@ -54,7 +54,7 @@ fun TecnicoScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val tipos by viewModel.tipos.collectAsStateWithLifecycle(emptyList())
-    val tecnicos by viewModel.tecnicos.collectAsStateWithLifecycle()
+    viewModel.tecnicos.collectAsStateWithLifecycle()
 
     NavigationDrawer(navController = navController){
         TecnicoBody(
@@ -63,36 +63,43 @@ fun TecnicoScreen(
             navController = navController,
             onNombreChanged = viewModel::onNombreChanged,
             onSueldoHoraChanged = viewModel::onSueldoHoraChanged,
-            onTipoSelected = viewModel::onTipoSelected,
+            onTipoTecnicoChanged = viewModel::onTipoTecnicoChanged,
+            onValidation = viewModel::validation,
             onSaveTecnico = {
                 viewModel.saveTecnico()
             },
             onDeleteTecnico = {
                 viewModel.deleteTecnico()
             },
-            onNombreExist = {nombre: String, id: Int? ->
-                viewModel.nombreExists(nombre, id)
+            onNewTecnico = {
+                viewModel.newTecnico()
             }
         )
     }
 }
-var nombreVacio by mutableStateOf(false)
-var nombreExtenso by mutableStateOf(false)
-var nombreRepetido by mutableStateOf(false)
-var sueldoHoraNoValido by mutableStateOf(false)
-var sinTipo by mutableStateOf(false)
 @Composable
 fun TecnicoBody(
     uiState: TecnicoUIState,
     tipos: List<TipoTecnicoEntity>,
     onNombreChanged: (String) -> Unit,
     onSueldoHoraChanged: (String) -> Unit,
-    onTipoSelected: (String) -> Unit,
-    onNombreExist: (String, Int?) -> Boolean,
+    onTipoTecnicoChanged: (String) -> Unit,
     onSaveTecnico: () -> Unit,
     onDeleteTecnico: () -> Unit,
+    onNewTecnico: () -> Unit,
+    onValidation: () -> Boolean,
     navController: NavHostController
 ) {
+    var nombreVacio by remember {mutableStateOf(false)}
+    var nombreRepetido by remember {mutableStateOf(false)}
+    var sueldoHoraNoValido by remember {mutableStateOf(false)}
+    var sinTipo by remember {mutableStateOf(false)}
+
+    var guardo by remember { mutableStateOf(false) }
+    var errorGuardar by remember { mutableStateOf(false) }
+    var elimino by remember { mutableStateOf(false) }
+    var errorEliminar by remember { mutableStateOf(false) }
+    var showDialog by remember { mutableStateOf(false) }
     var selectedTipo by remember { mutableStateOf<TipoTecnicoEntity?>(null) }
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -112,18 +119,11 @@ fun TecnicoBody(
                         .fillMaxWidth()
                         .padding(8.dp)
                 ) {
-
-                    var guardo by remember { mutableStateOf(false) }
-                    var errorGuardar by remember { mutableStateOf(false) }
-                    var elimino by remember { mutableStateOf(false) }
-                    var errorEliminar by remember { mutableStateOf(false) }
-                    var showDialog by remember { mutableStateOf(false) }
-
                     OutlinedTextField(
                         label = { Text(text = "Nombre") },
                         value = uiState.nombre,
                         onValueChange =  onNombreChanged,
-                        isError = nombreExtenso || nombreVacio || nombreRepetido,
+                        isError = nombreVacio || nombreRepetido,
                         keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
                         trailingIcon = {
                             Icon(
@@ -133,7 +133,6 @@ fun TecnicoBody(
                         },
                         modifier = Modifier.fillMaxWidth()
                     )
-                    nombreRepetido = onNombreExist(uiState.nombre, uiState.tecnicoId)
                     if(nombreRepetido){
                         Text(
                             text = "Nombre de técnico ya existe.",
@@ -145,14 +144,6 @@ fun TecnicoBody(
                     if(nombreVacio){
                         Text(
                             text = "Campo Obligatorio.",
-                            color = Color.Red,
-                            fontStyle = FontStyle.Italic,
-                            fontSize = 14.sp
-                        )
-                    }
-                    if(nombreExtenso){
-                        Text(
-                            text = "Nombre debe ser menor a 30 caracteres.",
                             color = Color.Red,
                             fontStyle = FontStyle.Italic,
                             fontSize = 14.sp
@@ -190,9 +181,9 @@ fun TecnicoBody(
                         itemToString = { it.descripcion ?: "" },
                         onItemSelected = {
                             selectedTipo = it
-                            onTipoSelected(it.descripcion ?: "")
+                            onTipoTecnicoChanged(it.descripcion ?: "")
                         },
-                        selectedItem = uiState.tipo ?: "",
+                        selectedItem = uiState.tipo
                     )
                     if(sinTipo){
                         Text(
@@ -209,13 +200,11 @@ fun TecnicoBody(
                     ) {
                         OutlinedButton(
                             onClick = {
-                                onNombreChanged("")
-                                onSueldoHoraChanged("")
-                                onTipoSelected("")
+                                onNewTecnico()
                                 nombreVacio = false
-                                nombreExtenso = false
                                 sueldoHoraNoValido = false
                                 sinTipo = false
+                                nombreRepetido = false
                             }
                         ) {
                             Icon(
@@ -228,19 +217,22 @@ fun TecnicoBody(
                         }
                         OutlinedButton(
                             onClick = {
-                                if (validar(uiState.nombre,uiState.sueldoHora,uiState.tipo) && !onNombreExist(uiState.nombre, uiState.tecnicoId)) {
+                                if (onValidation()) {
                                     onSaveTecnico()
-                                    onNombreChanged("")
-                                    onSueldoHoraChanged("")
-                                    onTipoSelected("")
                                     guardo = true
                                     nombreVacio = false
-                                    nombreExtenso = false
                                     sueldoHoraNoValido = false
                                     sinTipo = false
+                                    nombreRepetido = false
                                     navController.navigate(Screen.TecnicoList)
                                 }
-                                else{ errorGuardar = true}
+                                else{
+                                    errorGuardar = true
+                                    nombreVacio = uiState.nombreEmpty
+                                    sueldoHoraNoValido = uiState.sueldoHoraEmpty
+                                    nombreRepetido = uiState.nombreRepetido
+                                    sinTipo = uiState.tipoEmpty
+                                }
                             }
                         ) {
                             Icon(
@@ -254,9 +246,6 @@ fun TecnicoBody(
                             onClick = {
                                 if(uiState.tecnicoId != null){
                                     showDialog = true
-                                    nombreVacio = false
-                                    nombreExtenso = false
-                                    sueldoHoraNoValido = false
                                 }else{
                                     errorEliminar = true
                                 }
@@ -277,7 +266,6 @@ fun TecnicoBody(
                             Notification("Error al Eliminar")
                             errorEliminar = false
                         }
-
                         if(guardo){
                             Notification("Guardado Correctamente")
                             guardo = false
@@ -298,10 +286,6 @@ fun TecnicoBody(
                                         onDeleteTecnico()
                                         showDialog = false
                                         elimino = true
-                                        nombreVacio = false
-                                        nombreExtenso = false
-                                        sueldoHoraNoValido = false
-                                        sinTipo = false
                                         navController.navigate(Screen.TecnicoList)
                                     }
                                 ) {
@@ -320,13 +304,6 @@ fun TecnicoBody(
         }
     }
 }
-private fun validar(nombre: String, sueldoHora: Double?, tipo: String) : Boolean {
-    nombreVacio = nombre.isEmpty()
-    nombreExtenso = nombre.length > 30
-    sueldoHoraNoValido = (sueldoHora ?: 0.0) <= 0.0
-    sinTipo = tipo.isEmpty()
-    return !nombreExtenso && !nombreVacio && !sueldoHoraNoValido && !sinTipo
-}
 @Preview
 @Composable
 private fun TecnicoPreview() {
@@ -335,10 +312,11 @@ private fun TecnicoPreview() {
             uiState = TecnicoUIState(),
             onNombreChanged =  {},
             onSueldoHoraChanged = {},
-            onTipoSelected = {},
-            onNombreExist = { _, _ -> false },
+            onTipoTecnicoChanged = {},
+            onValidation = {false},
             onSaveTecnico = {},
             onDeleteTecnico = {},
+            onNewTecnico = {},
             tipos = emptyList(),
             navController = NavHostController(LocalContext.current)
         )

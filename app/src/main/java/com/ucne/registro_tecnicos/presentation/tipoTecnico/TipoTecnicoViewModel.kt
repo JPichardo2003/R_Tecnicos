@@ -31,7 +31,7 @@ class TipoTecnicoViewModel(private val repository: TipoTecnicoRepository, privat
     }
 
     fun onDescripcionChanged(descripcion: String){
-        val regex = Regex("[a-zA-Z ]*")
+        val regex = Regex("[\\p{L} ]*")
         if (descripcion.matches(regex) && !descripcion.startsWith(" ")) {
             uiState.update {
                 it.copy(descripcion = descripcion)
@@ -49,6 +49,7 @@ class TipoTecnicoViewModel(private val repository: TipoTecnicoRepository, privat
     fun saveTipoTecnico() {
         viewModelScope.launch {
             repository.saveTipoTecnico(uiState.value.toEntity())
+            newTipoTecnico()
         }
     }
     fun deleteTipoTecnico() {
@@ -56,14 +57,30 @@ class TipoTecnicoViewModel(private val repository: TipoTecnicoRepository, privat
             repository.deleteTipoTecnico(uiState.value.toEntity())
         }
     }
-    fun descripcionExists(descripcion: String, id: Int?): Boolean {
+    fun newTipoTecnico(){
+        viewModelScope.launch {
+            uiState.value = TipoTecnicoUIState()
+        }
+    }
+    fun validation(): Boolean {
+        uiState.value.descripcionEmpty = (uiState.value.descripcion.isEmpty())
+        uiState.value.descripcionRepetida = descripcionExists(uiState.value.descripcion, uiState.value.tipoId)
+        uiState.update {
+            it.copy( saveSuccess =  !uiState.value.descripcionEmpty && !uiState.value.descripcionRepetida)
+        }
+        return uiState.value.saveSuccess
+    }
+    private fun descripcionExists(descripcion: String, id: Int?): Boolean {
         return tipoTecnicos.value.any { it.descripcion?.replace(" ", "")?.uppercase() == descripcion.replace(" ", "").uppercase() && it.tipoId != id }
     }
 }
 
 data class TipoTecnicoUIState(
     val tipoId: Int? = null,
-    var descripcion: String = ""
+    var descripcion: String = "",
+    var descripcionEmpty: Boolean = false,
+    var descripcionRepetida: Boolean = false,
+    var saveSuccess: Boolean = false
 )
 
 fun TipoTecnicoUIState.toEntity(): TipoTecnicoEntity {

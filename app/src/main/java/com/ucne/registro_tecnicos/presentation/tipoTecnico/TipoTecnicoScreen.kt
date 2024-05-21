@@ -47,35 +47,37 @@ fun TipoTecnicoScreen(
     navController: NavHostController
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val tipos by viewModel.tipoTecnicos.collectAsStateWithLifecycle()
+    viewModel.tipoTecnicos.collectAsStateWithLifecycle()
     NavigationDrawer(navController = navController){
         TipoTecnicoBody(
             uiState = uiState,
             navController = navController,
             onDescripcionChanged = viewModel::onDescripcionChanged,
+            onValidation = viewModel::validation,
             onSaveTipoTecnico = {
                 viewModel.saveTipoTecnico()
             },
             onDeleteTipoTecnico = {
                 viewModel.deleteTipoTecnico()
             },
-            onDescripcionExist = { descripcion, id: Int? ->
-                viewModel.descripcionExists(descripcion, id)
+            onNewTipoTecnico = {
+                viewModel.newTipoTecnico()
             }
         )
     }
 }
-var descripcionVacio by mutableStateOf(false)
-var descripcionRepetido by mutableStateOf(false)
 @Composable
 fun TipoTecnicoBody(
     uiState: TipoTecnicoUIState,
     onDescripcionChanged: (String) -> Unit,
-    onDescripcionExist: (String, Int?) -> Boolean,
     onSaveTipoTecnico: () -> Unit,
     onDeleteTipoTecnico: () -> Unit,
+    onNewTipoTecnico: () -> Unit,
+    onValidation: () -> Boolean,
     navController: NavHostController
 ) {
+    var descripcionVacio by remember{mutableStateOf(false)}
+    var descripcionRepetido by remember{mutableStateOf(false)}
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = { TopAppBar("Registro TipoTécnicos") }
@@ -115,7 +117,6 @@ fun TipoTecnicoBody(
                         },
                         modifier = Modifier.fillMaxWidth()
                     )
-                    descripcionRepetido = onDescripcionExist(uiState.descripcion, uiState.tipoId)
                     if(descripcionRepetido){
                         Text(
                             text = "Tipo Técnico ya existe.",
@@ -141,7 +142,7 @@ fun TipoTecnicoBody(
                     ) {
                         OutlinedButton(
                             onClick = {
-                                onDescripcionChanged("")
+                                onNewTipoTecnico()
                                 descripcionVacio = false
                                 descripcionRepetido = false
 
@@ -157,15 +158,18 @@ fun TipoTecnicoBody(
                         }
                         OutlinedButton(
                             onClick = {
-                                if (validar(uiState.descripcion) && !onDescripcionExist(uiState.descripcion, uiState.tipoId)) {
+                                if (onValidation()) {
                                     onSaveTipoTecnico()
-                                    uiState.descripcion = ""
                                     guardo = true
                                     descripcionVacio = false
                                     descripcionRepetido = false
                                     navController.navigate(Screen.TipoTecnicoList)
                                 }
-                                else{ errorGuardar = true}
+                                else{
+                                    errorGuardar = true
+                                    descripcionVacio = uiState.descripcionEmpty
+                                    descripcionRepetido = uiState.descripcionRepetida
+                                }
                             }
                         ) {
                             Icon(
@@ -240,10 +244,6 @@ fun TipoTecnicoBody(
         }
     }
 }
-private fun validar(descripcion: String) : Boolean {
-    descripcionVacio = descripcion.isEmpty()
-    return !descripcionVacio
-}
 @Preview
 @Composable
 private fun TipoTecnicoPreview() {
@@ -251,9 +251,10 @@ private fun TipoTecnicoPreview() {
         TipoTecnicoBody(
             uiState = TipoTecnicoUIState(),
             onDescripcionChanged =  {},
-            onDescripcionExist = { _, _ -> false },
             onSaveTipoTecnico = {},
             onDeleteTipoTecnico = {},
+            onNewTipoTecnico = {},
+            onValidation = { false },
             navController = NavHostController(LocalContext.current)
         )
     }
