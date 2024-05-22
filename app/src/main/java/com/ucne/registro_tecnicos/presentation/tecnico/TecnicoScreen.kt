@@ -194,13 +194,15 @@ fun TecnicoBody(
                     selectedTipo = it
                     onTipoTecnicoChanged(it.descripcion ?: "")
                 },
-                selectedItem = uiState.tipo
+                selectedItem = uiState.tipo,
+                isError = sinTipo
             )
             if(sinTipo){
                 Text(
                     text = "Campo Obligatorio.",
                     color = Color.Red,
-                    fontStyle = FontStyle.Italic
+                    fontStyle = FontStyle.Italic,
+                    fontSize = 14.sp
                 )
             }
 

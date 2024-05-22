@@ -26,7 +26,8 @@ fun <T> DropDownInput(
     label: String,
     itemToString: (T) -> String,
     onItemSelected: (T) -> Unit,
-    selectedItem: String
+    selectedItem: String,
+    isError: Boolean
 ) {
     var expanded by remember { mutableStateOf(false) }
     var selectedText by remember { mutableStateOf(selectedItem)}
@@ -50,9 +51,10 @@ fun <T> DropDownInput(
                     .menuAnchor().fillMaxWidth(),
                 label = { Text(label) },
                 trailingIcon = {
-                    Icon(icon, contentDescription = null,
+                    Icon(icon, contentDescription = "inputSelect",
                         Modifier.clickable { expanded = !expanded })
-                }
+                },
+                isError = isError
             )
             ExposedDropdownMenu(
                 expanded = expanded,
