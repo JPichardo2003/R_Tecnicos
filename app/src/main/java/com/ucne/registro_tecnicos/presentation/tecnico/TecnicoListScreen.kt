@@ -9,10 +9,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Divider
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -24,6 +27,7 @@ import com.ucne.registro_tecnicos.presentation.components.FloatingButton
 import com.ucne.registro_tecnicos.presentation.components.NavigationDrawer
 import com.ucne.registro_tecnicos.presentation.components.TopAppBar
 import com.ucne.registro_tecnicos.ui.theme.Registro_TecnicosTheme
+import kotlinx.coroutines.launch
 
 @Composable
 fun TecnicoListScreen(
@@ -33,111 +37,68 @@ fun TecnicoListScreen(
     navController: NavHostController
 ) {
     val tecnicos by viewModel.tecnicos.collectAsStateWithLifecycle()
-    NavigationDrawer(navController = navController){
-        TecnicoListBody(
-            tecnicos = tecnicos,
-            onVerTecnico = onVerTecnico,
-            onAddTecnico = onAddTecnico
-            //onDeleteTecnico = {}
-        )
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
+    NavigationDrawer(navController = navController, drawerState = drawerState){
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            topBar = { TopAppBar(
+                title = "Técnicos",
+                onMenuClick = { scope.launch { drawerState.open() } }
+            )},
+            floatingActionButton = { FloatingButton(onAddTecnico) }
+        ){
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(4.dp)
+                    .padding(it)
+            ) {
+                TecnicoListBody(
+                    tecnicos = tecnicos,
+                    onVerTecnico = onVerTecnico
+                )
+            }
+        }
     }
-
 }
 @Composable
 fun TecnicoListBody(
     tecnicos: List<TecnicoEntity>,
-    onVerTecnico: (TecnicoEntity) -> Unit,
-    onAddTecnico: () -> Unit
-    //onDeleteTecnico: (TecnicoEntity) -> Unit
+    onVerTecnico: (TecnicoEntity) -> Unit
 ) {
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        topBar = { TopAppBar(title = "Técnicos") },
-        floatingActionButton = { FloatingButton(onAddTecnico) }
-    )
-    {
-        /*var showDialog by remember { mutableStateOf(false) }
-        var tecnicoToDelete by remember { mutableStateOf<TecnicoEntity?>(null) }
-        var elimino by remember { mutableStateOf(false) }*/
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(4.dp)
-                .padding(it)
-        ) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(text = "ID", modifier = Modifier.weight(0.10f))
+        Text(text = "Nombre", modifier = Modifier.weight(0.220f))
+        Text(text = "SueldoHora", modifier = Modifier.weight(0.25f))
+        Text(text = "Tipo", modifier = Modifier.weight(0.25f))
+    }
+
+    Divider()
+
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+        items(tecnicos) { tecnico ->
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .clickable { onVerTecnico(tecnico) }
                     .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = "ID", modifier = Modifier.weight(0.10f))
-                Text(text = "Nombre", modifier = Modifier.weight(0.220f))
-                Text(text = "SueldoHora", modifier = Modifier.weight(0.25f))
-                Text(text = "Tipo", modifier = Modifier.weight(0.25f))
-                //Spacer(modifier = Modifier.weight(0.05f)) // Espacio adicional para el icono de basura
-            }
-
-            Divider()
-
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-            ) {
-                items(tecnicos) { tecnico ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onVerTecnico(tecnico) }
-                            .padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(text = tecnico.tecnicoId.toString(), modifier = Modifier.weight(0.12f))
-                        Text(text = tecnico.nombre.toString(), modifier = Modifier.weight(0.300f))
-                        Text(text = tecnico.sueldoHora.toString(), modifier = Modifier.weight(0.25f))
-                        Text(text = tecnico.tipo.toString(), modifier = Modifier.weight(0.30f))
-
-                        /*IconButton(
-                            onClick = { tecnicoToDelete = tecnico
-                                showDialog = true
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Delete,
-                                contentDescription = "Delete Tecnico"
-                            )
-                        }*/
-                    }
-                }
+                Text(text = tecnico.tecnicoId.toString(), modifier = Modifier.weight(0.12f))
+                Text(text = tecnico.nombre.toString(), modifier = Modifier.weight(0.300f))
+                Text(text = tecnico.sueldoHora.toString(), modifier = Modifier.weight(0.25f))
+                Text(text = tecnico.tipo.toString(), modifier = Modifier.weight(0.30f))
             }
         }
-        /*if (showDialog) {
-            AlertDialog(
-                onDismissRequest = { showDialog = false },
-                title = { Text("Eliminar Tecnico") },
-                text = { Text("¿Está seguro de que desea eliminar este tecnico?") },
-                confirmButton = {
-                    Button(
-                        onClick = {
-                            onDeleteTecnico(tecnicoToDelete!!)
-                            showDialog = false
-                            elimino = true
-                        }
-                    ) {
-                        Text("Sí")
-                    }
-                },
-                dismissButton = {
-                    Button(onClick = { showDialog = false }) {
-                        Text("Cancelar")
-                    }
-                }
-            )
-        }
-        if(elimino){
-            Notification("Tecnico Eliminado")
-            elimino = false
-        }*/
     }
 }
 @Preview
@@ -154,6 +115,6 @@ private fun TecnicoListPreview() {
     Registro_TecnicosTheme {
         TecnicoListBody(tecnicos = tecnicos,
             onVerTecnico = {}
-        ){}
+        )
     }
 }
