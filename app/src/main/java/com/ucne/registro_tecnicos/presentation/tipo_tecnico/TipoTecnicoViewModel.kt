@@ -1,4 +1,4 @@
-package com.ucne.registro_tecnicos.presentation.tipoTecnico
+package com.ucne.registro_tecnicos.presentation.tipo_tecnico
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,6 +14,13 @@ class TipoTecnicoViewModel(private val repository: TipoTecnicoRepository, privat
     : ViewModel() {
     var uiState = MutableStateFlow(TipoTecnicoUIState())
         private set
+
+    val tipoTecnicos = repository.getTiposTecnicos()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = emptyList()
+        )
 
     init{
         viewModelScope.launch {
@@ -38,13 +45,6 @@ class TipoTecnicoViewModel(private val repository: TipoTecnicoRepository, privat
             }
         }
     }
-
-    val tipoTecnicos = repository.getTiposTecnicos()
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = emptyList()
-        )
 
     fun saveTipoTecnico() {
         viewModelScope.launch {

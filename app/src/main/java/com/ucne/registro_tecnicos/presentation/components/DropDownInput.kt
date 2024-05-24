@@ -26,11 +26,13 @@ fun <T> DropDownInput(
     label: String,
     itemToString: (T) -> String,
     onItemSelected: (T) -> Unit,
-    selectedItem: String,
+    itemToId: (T) -> Int?,
+    selectedItemId: Int?,
     isError: Boolean
 ) {
     var expanded by remember { mutableStateOf(false) }
-    var selectedText by remember { mutableStateOf(selectedItem)}
+    val selectedItem = items.find { itemToId(it) == selectedItemId }
+    val selectedText = selectedItem?.let { itemToString(it) } ?: ""
 
     val icon = if (expanded)
         Icons.Filled.KeyboardArrowUp
@@ -43,9 +45,9 @@ fun <T> DropDownInput(
     ){
         Column{
             OutlinedTextField(
-                value = selectedItem,
+                value = selectedText,
                 readOnly = true,
-                onValueChange = { selectedText = it },
+                onValueChange = {},
                 modifier = Modifier
                     .clickable { expanded = !expanded }
                     .menuAnchor().fillMaxWidth(),
@@ -63,9 +65,8 @@ fun <T> DropDownInput(
                 items.forEach { item ->
                     DropdownMenuItem(
                         onClick = {
-                            selectedText = itemToString(item)
-                            expanded = false
                             onItemSelected(item)
+                            expanded = false
                         },
                         text = { Text(itemToString(item)) }
                     )

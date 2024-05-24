@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalDrawerSheet
@@ -22,8 +23,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
-import com.ucne.registro_tecnicos.Screen
 import kotlinx.coroutines.launch
 
 data class NavigationItem(
@@ -34,8 +33,9 @@ data class NavigationItem(
 )
 @Composable
 fun NavigationDrawer(
-    navController: NavHostController,
     drawerState: DrawerState,
+    navTecnicoList: () -> Unit,
+    navTipoTecnicoList: () -> Unit,
     content: @Composable () -> Unit
 ) {
     val scope = rememberCoroutineScope()
@@ -52,10 +52,13 @@ fun NavigationDrawer(
         )
     )
     val selectedItem = remember { mutableStateOf(items[0]) }
+
     ModalNavigationDrawer(
         drawerContent = {
             ModalDrawerSheet {
                 Spacer(modifier = Modifier.height(16.dp))
+                Text(text = "Menu de Navegación", modifier = Modifier.padding(16.dp))
+                Divider()
                 items.forEach { item ->
                     NavigationDrawerItem(
                         icon = {
@@ -74,8 +77,8 @@ fun NavigationDrawer(
                             selectedItem.value = item
                             scope.launch { drawerState.close() }
                             when (item.title) {
-                                "TécnicoListScreen" -> navController.navigate(Screen.TecnicoList)
-                                "TipoTécnicoListScreen" -> navController.navigate(Screen.TipoTecnicoList)
+                                "TécnicoListScreen" -> navTecnicoList()
+                                "TipoTécnicoListScreen" -> navTipoTecnicoList()
                             }
                         },
                         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)

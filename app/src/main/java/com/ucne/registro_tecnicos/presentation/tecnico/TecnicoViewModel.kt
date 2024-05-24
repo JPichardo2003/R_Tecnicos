@@ -44,7 +44,7 @@ class TecnicoViewModel(
                         tecnicoId = tecnico.tecnicoId,
                         nombre = tecnico.nombre ?: "",
                         sueldoHora = tecnico.sueldoHora,
-                        tipo = tecnico.tipo ?: ""
+                        tipoId = tecnico.tipoId
                     )
                 }
             }
@@ -70,9 +70,9 @@ class TecnicoViewModel(
             }
         }
     }
-    fun onTipoTecnicoChanged(tipo: String) {
+    fun onTipoTecnicoChanged(tipoId: Int?) {
         uiState.update {
-            it.copy(tipo = tipo)
+            it.copy(tipoId = tipoId)
         }
     }
 
@@ -95,10 +95,15 @@ class TecnicoViewModel(
     private fun nombreExists(nombre: String, id: Int?): Boolean {
         return tecnicos.value.any { it.nombre?.replace(" ", "")?.uppercase() == nombre.replace(" ", "").uppercase() && it.tecnicoId != id }
     }
+
+    fun getTipoDescripcion(tipoId: Int?): String {
+        return tipos.value.find { it.tipoId == tipoId }?.descripcion ?: ""
+    }
+
     fun validation(): Boolean {
         uiState.value.nombreEmpty = (uiState.value.nombre.isEmpty())
         uiState.value.sueldoHoraEmpty = ((uiState.value.sueldoHora ?: 0.0) <= 0.0)
-        uiState.value.tipoEmpty = (uiState.value.tipo.isEmpty())
+        uiState.value.tipoEmpty = (uiState.value.tipoId == null)
         uiState.value.nombreRepetido = nombreExists(uiState.value.nombre, uiState.value.tecnicoId)
         uiState.update {
             it.copy( saveSuccess =  !uiState.value.nombreEmpty &&
@@ -118,7 +123,7 @@ data class TecnicoUIState(
     var nombreRepetido: Boolean = false,
     var sueldoHora: Double? = null,
     var sueldoHoraEmpty: Boolean = false,
-    var tipo: String = "",
+    var tipoId: Int? = null,
     var tipoEmpty: Boolean = false,
     var saveSuccess: Boolean = false,
 )
@@ -128,6 +133,6 @@ fun TecnicoUIState.toEntity(): TecnicoEntity {
         tecnicoId = tecnicoId,
         nombre = nombre,
         sueldoHora = sueldoHora,
-        tipo = tipo
+        tipoId = tipoId
     )
 }

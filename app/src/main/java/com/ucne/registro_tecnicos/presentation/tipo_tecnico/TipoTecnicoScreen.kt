@@ -1,4 +1,4 @@
-package com.ucne.registro_tecnicos.presentation.tecnico
+package com.ucne.registro_tecnicos.presentation.tipo_tecnico
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,7 +12,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ElevatedCard
@@ -28,87 +27,65 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.ucne.registro_tecnicos.R
-import com.ucne.registro_tecnicos.data.local.entities.TipoTecnicoEntity
-import com.ucne.registro_tecnicos.presentation.components.DropDownInput
 import com.ucne.registro_tecnicos.presentation.components.Notification
 import com.ucne.registro_tecnicos.presentation.components.TopAppBar
 import com.ucne.registro_tecnicos.ui.theme.Registro_TecnicosTheme
 
 @Composable
-fun TecnicoScreen(
-    viewModel: TecnicoViewModel,
-    goBack: () -> Unit,
-    openDrawer: () -> Unit
+fun TipoTecnicoScreen(
+    viewModel: TipoTecnicoViewModel,
+    goBackTipoTecnicoList: () -> Unit,
+    openDrawer: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val tipos by viewModel.tipos.collectAsStateWithLifecycle(emptyList())
-    viewModel.tecnicos.collectAsStateWithLifecycle()
+    viewModel.tipoTecnicos.collectAsStateWithLifecycle()
 
-    TecnicoBody(
+    TipoTecnicoBody(
         uiState = uiState,
-        tipos = tipos,
-        onNombreChanged = viewModel::onNombreChanged,
-        onSueldoHoraChanged = viewModel::onSueldoHoraChanged,
-        onTipoTecnicoChanged = viewModel::onTipoTecnicoChanged,
+        onDescripcionChanged = viewModel::onDescripcionChanged,
         onValidation = viewModel::validation,
-        goBack = goBack,
         openDrawer = openDrawer,
-        onSaveTecnico = {
-            viewModel.saveTecnico()
+        goBackTipoTecnicoList = goBackTipoTecnicoList,
+        onSaveTipoTecnico = {
+            viewModel.saveTipoTecnico()
         },
-        onDeleteTecnico = {
-            viewModel.deleteTecnico()
+        onDeleteTipoTecnico = {
+            viewModel.deleteTipoTecnico()
         },
-        onNewTecnico = {
-            viewModel.newTecnico()
+        onNewTipoTecnico = {
+            viewModel.newTipoTecnico()
         }
     )
 }
-
 @Composable
-fun TecnicoBody(
-    uiState: TecnicoUIState,
-    tipos: List<TipoTecnicoEntity>,
-    goBack: () -> Unit,
+fun TipoTecnicoBody(
+    uiState: TipoTecnicoUIState,
+    onDescripcionChanged: (String) -> Unit,
+    onSaveTipoTecnico: () -> Unit,
+    onDeleteTipoTecnico: () -> Unit,
+    onNewTipoTecnico: () -> Unit,
     openDrawer: () -> Unit,
-    onNombreChanged: (String) -> Unit,
-    onSueldoHoraChanged: (String) -> Unit,
-    onTipoTecnicoChanged: (Int) -> Unit,
-    onSaveTecnico: () -> Unit,
-    onDeleteTecnico: () -> Unit,
-    onNewTecnico: () -> Unit,
-    onValidation: () -> Boolean
+    goBackTipoTecnicoList: () -> Unit,
+    onValidation: () -> Boolean,
 ) {
-    var nombreVacio by remember { mutableStateOf(false) }
-    var nombreRepetido by remember { mutableStateOf(false) }
-    var sueldoHoraNoValido by remember { mutableStateOf(false) }
-    var sinTipo by remember { mutableStateOf(false) }
-
-    var guardo by remember { mutableStateOf(false) }
-    var errorGuardar by remember { mutableStateOf(false) }
-    var elimino by remember { mutableStateOf(false) }
-    var errorEliminar by remember { mutableStateOf(false) }
-    var showDialog by remember { mutableStateOf(false) }
-    var selectedTipo by remember { mutableStateOf<TipoTecnicoEntity?>(null) }
+    var descripcionVacio by remember{mutableStateOf(false)}
+    var descripcionRepetido by remember{mutableStateOf(false)}
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
-                title = "Registro Técnicos",
+                title="Registro TipoTécnicos",
                 onMenuClick = openDrawer
             )
         }
-    ) {
+    ){
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -123,78 +100,36 @@ fun TecnicoBody(
                         .fillMaxWidth()
                         .padding(8.dp)
                 ) {
+
+                    var guardo by remember { mutableStateOf(false) }
+                    var errorGuardar by remember { mutableStateOf(false) }
+                    var elimino by remember { mutableStateOf(false) }
+                    var errorEliminar by remember { mutableStateOf(false) }
+                    var showDialog by remember { mutableStateOf(false) }
+
                     OutlinedTextField(
-                        label = { Text(text = "Nombre") },
-                        value = uiState.nombre,
-                        onValueChange = onNombreChanged,
-                        isError = nombreVacio || nombreRepetido,
+                        label = { Text(text = "Descripción") },
+                        value = uiState.descripcion,
+                        onValueChange =  onDescripcionChanged,
+                        isError = descripcionRepetido || descripcionVacio,
                         keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
                         trailingIcon = {
                             Icon(
-                                imageVector = Icons.Default.Person,
-                                contentDescription = "Campo Nombre"
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = "Campo Descripción"
                             )
                         },
                         modifier = Modifier.fillMaxWidth()
                     )
-                    if (nombreRepetido) {
+                    if(descripcionRepetido){
                         Text(
-                            text = "Nombre de técnico ya existe.",
+                            text = "Tipo Técnico ya existe.",
                             color = Color.Red,
                             fontStyle = FontStyle.Italic,
                             fontSize = 14.sp
                         )
                     }
-                    if (nombreVacio) {
-                        Text(
-                            text = "Campo Obligatorio.",
-                            color = Color.Red,
-                            fontStyle = FontStyle.Italic,
-                            fontSize = 14.sp
-                        )
-                    }
-
-                    OutlinedTextField(
-                        label = { Text(text = "Sueldo Hora") },
-                        value = uiState.sueldoHora.toString().replace("null", ""),
-                        placeholder = { Text(text = "0.0") },
-                        prefix = { Text(text = "$") },
-                        onValueChange = onSueldoHoraChanged,
-                        keyboardOptions = KeyboardOptions.Default.copy(
-                            keyboardType = KeyboardType.Number,
-                            imeAction = ImeAction.Done
-                        ),
-                        isError = sueldoHoraNoValido,
-                        trailingIcon = {
-                            Icon(
-                                painter = painterResource(id = R.drawable.icons8dollarblack),
-                                contentDescription = "Sueldo por Hora"
-                            )
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    if (sueldoHoraNoValido) {
-                        Text(
-                            text = "Sueldo por Hora debe ser > 0.0",
-                            color = Color.Red,
-                            fontStyle = FontStyle.Italic,
-                            fontSize = 14.sp
-                        )
-                    }
-
-                    DropDownInput(
-                        items = tipos,
-                        label = "Tipos Técnico",
-                        itemToString = { it.descripcion ?: "" },
-                        itemToId = {it.tipoId},
-                        onItemSelected = {
-                            selectedTipo = it
-                            onTipoTecnicoChanged(it.tipoId ?: 0)
-                        },
-                        selectedItemId = uiState.tipoId,
-                        isError = sinTipo
-                    )
-                    if (sinTipo) {
+                    if(descripcionVacio){
                         Text(
                             text = "Campo Obligatorio.",
                             color = Color.Red,
@@ -204,17 +139,17 @@ fun TecnicoBody(
                     }
 
                     Spacer(modifier = Modifier.padding(2.dp))
+
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
                         OutlinedButton(
                             onClick = {
-                                onNewTecnico()
-                                nombreVacio = false
-                                sueldoHoraNoValido = false
-                                sinTipo = false
-                                nombreRepetido = false
+                                onNewTipoTecnico()
+                                descripcionVacio = false
+                                descripcionRepetido = false
+
                             }
                         ) {
                             Icon(
@@ -228,19 +163,16 @@ fun TecnicoBody(
                         OutlinedButton(
                             onClick = {
                                 if (onValidation()) {
-                                    onSaveTecnico()
+                                    onSaveTipoTecnico()
                                     guardo = true
-                                    nombreVacio = false
-                                    sueldoHoraNoValido = false
-                                    sinTipo = false
-                                    nombreRepetido = false
-                                    goBack()
-                                } else {
+                                    descripcionVacio = false
+                                    descripcionRepetido = false
+                                    goBackTipoTecnicoList()
+                                }
+                                else{
                                     errorGuardar = true
-                                    nombreVacio = uiState.nombreEmpty
-                                    sueldoHoraNoValido = uiState.sueldoHoraEmpty
-                                    nombreRepetido = uiState.nombreRepetido
-                                    sinTipo = uiState.tipoEmpty
+                                    descripcionVacio = uiState.descripcionEmpty
+                                    descripcionRepetido = uiState.descripcionRepetida
                                 }
                             }
                         ) {
@@ -253,9 +185,11 @@ fun TecnicoBody(
 
                         OutlinedButton(
                             onClick = {
-                                if (uiState.tecnicoId != null) {
+                                if(uiState.tipoId != null){
                                     showDialog = true
-                                } else {
+                                    descripcionVacio = false
+                                    descripcionRepetido = false
+                                }else{
                                     errorEliminar = true
                                 }
 
@@ -267,19 +201,20 @@ fun TecnicoBody(
                             )
                             Text(text = "Delete")
                         }
-                        if (elimino) {
+                        if(elimino){
                             Notification("Eliminado Correctamente")
                             elimino = false
                         }
-                        if (errorEliminar) {
+                        if(errorEliminar) {
                             Notification("Error al Eliminar")
                             errorEliminar = false
                         }
-                        if (guardo) {
+
+                        if(guardo){
                             Notification("Guardado Correctamente")
                             guardo = false
                         }
-                        if (errorGuardar) {
+                        if(errorGuardar) {
                             Notification("Error al Guardar")
                             errorGuardar = false
                         }
@@ -287,15 +222,15 @@ fun TecnicoBody(
                     if (showDialog) {
                         AlertDialog(
                             onDismissRequest = { showDialog = false },
-                            title = { Text("Eliminar Técnico") },
-                            text = { Text("¿Está seguro de que desea eliminar este técnico?") },
+                            title = { Text("Eliminar Tipo Técnico") },
+                            text = { Text("¿Está seguro de que desea eliminar este tipo técnico?") },
                             confirmButton = {
                                 Button(
                                     onClick = {
-                                        onDeleteTecnico()
+                                        onDeleteTipoTecnico()
                                         showDialog = false
                                         elimino = true
-                                        goBack()
+                                        goBackTipoTecnicoList()
                                     }
                                 ) {
                                     Text("Sí")
@@ -314,22 +249,20 @@ fun TecnicoBody(
     }
 }
 
+
 @Preview
 @Composable
-private fun TecnicoPreview() {
+private fun TipoTecnicoPreview() {
     Registro_TecnicosTheme {
-        TecnicoBody(
-            uiState = TecnicoUIState(),
-            onNombreChanged = {},
-            onSueldoHoraChanged = {},
-            onTipoTecnicoChanged = {},
+        TipoTecnicoBody(
+            uiState = TipoTecnicoUIState(),
+            onDescripcionChanged =  {},
+            onSaveTipoTecnico = {},
+            onDeleteTipoTecnico = {},
+            onNewTipoTecnico = {},
             onValidation = { false },
-            onSaveTecnico = {},
-            onDeleteTecnico = {},
-            onNewTecnico = {},
-            tipos = emptyList(),
-            goBack = {},
-            openDrawer = {}
+            openDrawer = {},
+            goBackTipoTecnicoList = {}
         )
     }
 }
