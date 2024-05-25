@@ -111,7 +111,7 @@ fun ServicioBody(
     var elimino by remember { mutableStateOf(false) }
     var errorEliminar by remember { mutableStateOf(false) }
     var showDialog by remember { mutableStateOf(false) }
-    var showDatePicker by mutableStateOf(false)
+    var showDatePicker by remember { mutableStateOf(false)}
     var selectedTecnico by remember { mutableStateOf<TecnicoEntity?>(null) }
 
     Scaffold(
