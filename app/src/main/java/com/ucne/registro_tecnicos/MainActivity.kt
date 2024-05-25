@@ -14,9 +14,13 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import androidx.room.Room
 import com.ucne.registro_tecnicos.data.local.database.TecnicoDb
+import com.ucne.registro_tecnicos.data.repository.ServicioRepository
 import com.ucne.registro_tecnicos.data.repository.TecnicoRepository
 import com.ucne.registro_tecnicos.data.repository.TipoTecnicoRepository
 import com.ucne.registro_tecnicos.presentation.components.NavigationDrawer
+import com.ucne.registro_tecnicos.presentation.servicio.ServicioListScreen
+import com.ucne.registro_tecnicos.presentation.servicio.ServicioScreen
+import com.ucne.registro_tecnicos.presentation.servicio.ServicioViewModel
 import com.ucne.registro_tecnicos.presentation.tecnico.TecnicoListScreen
 import com.ucne.registro_tecnicos.presentation.tecnico.TecnicoScreen
 import com.ucne.registro_tecnicos.presentation.tecnico.TecnicoViewModel
@@ -42,6 +46,7 @@ class MainActivity : ComponentActivity() {
 
         val repository = TecnicoRepository(tecnicoDb.tecnicoDao())
         val tipoRepository = TipoTecnicoRepository(tecnicoDb.tipoTecnicoDao())
+        val servicioRepository = ServicioRepository(tecnicoDb.servicioDao())
         enableEdgeToEdge()
         setContent {
             Registro_TecnicosTheme {
@@ -51,6 +56,7 @@ class MainActivity : ComponentActivity() {
                 NavigationDrawer(
                     navTecnicoList = { navController.navigate(Screen.TecnicoList)},
                     navTipoTecnicoList = { navController.navigate(Screen.TipoTecnicoList)},
+                    navServicioList = { navController.navigate(Screen.ServicioList)},
                     drawerState = drawerState
                 ){
                     NavHost(
@@ -113,6 +119,34 @@ class MainActivity : ComponentActivity() {
                                 }
                             )
                         }
+                        composable<Screen.ServicioList> {
+                            ServicioListScreen(
+                                viewModel = viewModel { ServicioViewModel(servicioRepository, repository ,0) },
+                                onVerServicio = {
+                                    navController.navigate(Screen.Servicio(it.servicioId ?: 0))
+                                },
+                                onAddServicio = {
+                                    navController.navigate(Screen.Servicio(0))
+                                },
+                                openDrawer = {
+                                    scope.launch {
+                                        drawerState.open()
+                                    }
+                                }
+                            )
+                        }
+                        composable<Screen.Servicio> {
+                            val args = it.toRoute<Screen.Servicio>()
+                            ServicioScreen(
+                                viewModel = viewModel { ServicioViewModel(servicioRepository, repository, args.servicioId) },
+                                goBackServicioList = {navController.navigate(Screen.ServicioList)},
+                                openDrawer = {
+                                    scope.launch {
+                                        drawerState.open()
+                                    }
+                                }
+                            )
+                        }
                     }
                 }
 
@@ -130,4 +164,9 @@ sealed class Screen {
     object TipoTecnicoList : Screen()
     @Serializable
     data class TipoTecnico(val tipoId: Int) : Screen()
+    @Serializable
+    object ServicioList : Screen()
+    @Serializable
+    data class Servicio(val servicioId: Int) : Screen()
+
 }

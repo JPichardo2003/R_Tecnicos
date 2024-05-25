@@ -5,8 +5,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.outlined.AccountCircle
+import androidx.compose.material.icons.outlined.Build
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerState
@@ -36,6 +38,7 @@ fun NavigationDrawer(
     drawerState: DrawerState,
     navTecnicoList: () -> Unit,
     navTipoTecnicoList: () -> Unit,
+    navServicioList: () -> Unit,
     content: @Composable () -> Unit
 ) {
     val scope = rememberCoroutineScope()
@@ -49,6 +52,11 @@ fun NavigationDrawer(
             title = "TipoTécnicoListScreen",
             selectedIcon = Icons.Filled.Info,
             unselectedIcon = Icons.Outlined.Info
+        ),
+        NavigationItem(
+            title = "ServicioListScreen",
+            selectedIcon = Icons.Filled.Build,
+            unselectedIcon = Icons.Outlined.Build
         )
     )
     val selectedItem = remember { mutableStateOf(items[0]) }
@@ -79,6 +87,7 @@ fun NavigationDrawer(
                             when (item.title) {
                                 "TécnicoListScreen" -> navTecnicoList()
                                 "TipoTécnicoListScreen" -> navTipoTecnicoList()
+                                "ServicioListScreen" -> navServicioList()
                             }
                         },
                         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)

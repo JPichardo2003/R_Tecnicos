@@ -1,4 +1,4 @@
-package com.ucne.registro_tecnicos.presentation.tecnico
+package com.ucne.registro_tecnicos.presentation.servicio
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -18,49 +18,49 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.ucne.registro_tecnicos.data.local.entities.ServicioEntity
 import com.ucne.registro_tecnicos.data.local.entities.TecnicoEntity
-import com.ucne.registro_tecnicos.data.local.entities.TipoTecnicoEntity
 import com.ucne.registro_tecnicos.presentation.components.FloatingButton
 import com.ucne.registro_tecnicos.presentation.components.TopAppBar
 import com.ucne.registro_tecnicos.ui.theme.Registro_TecnicosTheme
 
 @Composable
-fun TecnicoListScreen(
-    viewModel: TecnicoViewModel,
-    onVerTecnico: (TecnicoEntity) -> Unit,
-    onAddTecnico: () -> Unit,
+fun ServicioListScreen(
+    viewModel: ServicioViewModel,
+    onVerServicio: (ServicioEntity) -> Unit,
+    onAddServicio: () -> Unit,
     openDrawer: () -> Unit
 ) {
+    val servicios by viewModel.servicios.collectAsStateWithLifecycle()
     val tecnicos by viewModel.tecnicos.collectAsStateWithLifecycle()
-    val tipos by viewModel.tipos.collectAsStateWithLifecycle()
 
-    TecnicoListBody(
+    ServicioListBody(
+        servicios = servicios,
         tecnicos = tecnicos,
-        tipos = tipos,
-        onVerTecnico = onVerTecnico,
-        onVerTipoDescripcion = viewModel::getTipoDescripcion,
-        onAddTecnico = onAddTecnico,
-        openDrawer = openDrawer
+        onVerServicio = onVerServicio,
+        onVerTecnicoNombre = viewModel::getTecnicoNombre,
+        onAddServicio = onAddServicio,
+        openDrawer = openDrawer,
     )
 }
 
 
 @Composable
-fun TecnicoListBody(
+fun ServicioListBody(
+    servicios: List<ServicioEntity>,
     tecnicos: List<TecnicoEntity>,
-    tipos: List<TipoTecnicoEntity>,
-    onVerTecnico: (TecnicoEntity) -> Unit,
-    onVerTipoDescripcion: (Int?) -> String,
-    onAddTecnico: () -> Unit,
+    onVerServicio: (ServicioEntity) -> Unit,
+    onVerTecnicoNombre: (Int?) -> String,
+    onAddServicio: () -> Unit,
     openDrawer: () -> Unit
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = { TopAppBar(
-            title = "Técnicos",
+            title = "Servicios",
             onMenuClick = openDrawer
         )},
-        floatingActionButton = { FloatingButton(onAddTecnico) }
+        floatingActionButton = { FloatingButton(onAddServicio) }
     ) {
         Column(
             modifier = Modifier
@@ -75,9 +75,9 @@ fun TecnicoListBody(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(text = "ID", modifier = Modifier.weight(0.10f))
-                Text(text = "Nombre", modifier = Modifier.weight(0.220f))
-                Text(text = "SueldoHora", modifier = Modifier.weight(0.25f))
-                Text(text = "Tipo", modifier = Modifier.weight(0.25f))
+                Text(text = "Servicio", modifier = Modifier.weight(0.350f))
+                Text(text = "Cliente", modifier = Modifier.weight(0.30f))
+                Text(text = "Técnico", modifier = Modifier.weight(0.25f))
             }
 
             Divider()
@@ -86,18 +86,18 @@ fun TecnicoListBody(
                 modifier = Modifier
                     .fillMaxSize()
             ) {
-                items(tecnicos) { tecnico ->
+                items(servicios) { servicio ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { onVerTecnico(tecnico) }
+                            .clickable { onVerServicio(servicio) }
                             .padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(text = tecnico.tecnicoId.toString(), modifier = Modifier.weight(0.12f))
-                        Text(text = tecnico.nombre.toString(), modifier = Modifier.weight(0.300f))
-                        Text(text = tecnico.sueldoHora.toString(), modifier = Modifier.weight(0.25f))
-                        Text(text = onVerTipoDescripcion(tecnico.tipoId), modifier = Modifier.weight(0.30f))
+                        Text(text = servicio.servicioId.toString(), modifier = Modifier.weight(0.12f))
+                        Text(text = servicio.descripcion.toString(), modifier = Modifier.weight(0.450f))
+                        Text(text = servicio.cliente .toString(), modifier = Modifier.weight(0.40f))
+                        Text(text = onVerTecnicoNombre(servicio.tecnicoId), modifier = Modifier.weight(0.30f))
                     }
                 }
             }
@@ -107,25 +107,29 @@ fun TecnicoListBody(
 }
 @Preview
 @Composable
-private fun TecnicoListPreview() {
-    val tecnicos = listOf(
-        TecnicoEntity(
+private fun ServicioListPreview() {
+    val servicios = listOf(
+        ServicioEntity(
+            servicioId = 1,
+            descripcion = "Cambio de RAM",
+            total = 54.0,
             tecnicoId = 1,
-            nombre = "Julio",
-            sueldoHora = 54.0,
-            tipoId = 1
+            cliente = "Microsoft",
+            fecha = "05/25/2024"
         )
     )
     Registro_TecnicosTheme {
-        TecnicoListBody(tecnicos = tecnicos,
-            onVerTecnico = {},
-            onAddTecnico = {},
+        ServicioListBody(servicios = servicios,
+            onVerServicio = {},
+            onAddServicio = {},
             openDrawer = {},
-            onVerTipoDescripcion = {"FullStack"},
-            tipos = listOf(
-                TipoTecnicoEntity(
-                    tipoId = 1,
-                    descripcion = "Programador"
+            onVerTecnicoNombre = {"Pichardo"},
+            tecnicos = listOf(
+                TecnicoEntity(
+                    tecnicoId = 1,
+                    nombre = "William",
+                    sueldoHora = 1000.0,
+                    tipoId = 1
                 )
             )
         )
