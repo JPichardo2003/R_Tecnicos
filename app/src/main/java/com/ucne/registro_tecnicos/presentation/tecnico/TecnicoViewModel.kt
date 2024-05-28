@@ -53,9 +53,17 @@ class TecnicoViewModel(
 
     fun onNombreChanged(nombre: String){
         val regex = Regex("[\\p{L} ]*")
+        val nombreError: String? = when {
+            nombre.isEmpty() -> "Campo Obligatorio."
+            nombreExists(nombre, uiState.value.tecnicoId) -> "El nombre está repetido."
+            else -> null
+        }
         if (nombre.matches(regex) && !nombre.startsWith(" ")) {
             uiState.update {
-                it.copy(nombre = nombre)
+                it.copy(
+                    nombre = nombre,
+                    nombreError = nombreError
+                )
             }
         }
     }
@@ -66,13 +74,17 @@ class TecnicoViewModel(
             uiState.update {
                 it.copy(
                     sueldoHora = sueldoHora,
+                    sueldoHoraError = null
                 )
             }
         }
     }
     fun onTipoTecnicoChanged(tipoId: Int?) {
         uiState.update {
-            it.copy(tipoId = tipoId)
+            it.copy(
+                tipoId = tipoId,
+                tipoError = null
+            )
         }
     }
 
@@ -101,31 +113,34 @@ class TecnicoViewModel(
     }
 
     fun validation(): Boolean {
-        uiState.value.nombreEmpty = (uiState.value.nombre.isEmpty())
-        uiState.value.sueldoHoraEmpty = ((uiState.value.sueldoHora ?: 0.0) <= 0.0)
-        uiState.value.tipoEmpty = (uiState.value.tipoId == null)
-        uiState.value.nombreRepetido = nombreExists(uiState.value.nombre, uiState.value.tecnicoId)
-        uiState.update {
-            it.copy( saveSuccess =  !uiState.value.nombreEmpty &&
-                    !uiState.value.sueldoHoraEmpty &&
-                    !uiState.value.tipoEmpty &&
-                    !uiState.value.nombreRepetido
-            )
+        val nombreEmpty = uiState.value.nombre.isEmpty()
+        val nombreRepeated = nombreExists(uiState.value.nombre, uiState.value.tecnicoId)
+        val sueldoHoraEmpty = ((uiState.value.sueldoHora ?: 0.0) <= 0.0)
+        val tipoEmpty = (uiState.value.tipoId == null) || (uiState.value.tipoId == 0)
+        if (nombreEmpty) {
+            uiState.update { it.copy(nombreError = "Campo Obligatorio.") }
         }
-        return uiState.value.saveSuccess
+        if (nombreRepeated) {
+            uiState.update { it.copy(nombreError = "El nombre está repetido.") }
+        }
+        if (sueldoHoraEmpty) {
+            uiState.update { it.copy(sueldoHoraError = "Sueldo debe ser mayor que 0.0") }
+        }
+        if (tipoEmpty) {
+            uiState.update { it.copy(tipoError = "Debe seleccionar un tipo técnico") }
+        }
+        return !nombreEmpty && !nombreRepeated && !sueldoHoraEmpty && !tipoEmpty
     }
 }
 
 data class TecnicoUIState(
     val tecnicoId: Int? = null,
     var nombre: String = "",
-    var nombreEmpty: Boolean = false,
-    var nombreRepetido: Boolean = false,
+    var nombreError: String? = null,
     var sueldoHora: Double? = null,
-    var sueldoHoraEmpty: Boolean = false,
+    var sueldoHoraError: String? = null,
     var tipoId: Int? = null,
-    var tipoEmpty: Boolean = false,
-    var saveSuccess: Boolean = false,
+    var tipoError: String? = null,
 )
 
 fun TecnicoUIState.toEntity(): TecnicoEntity {

@@ -74,8 +74,6 @@ fun TipoTecnicoBody(
     goBackTipoTecnicoList: () -> Unit,
     onValidation: () -> Boolean,
 ) {
-    var descripcionVacio by remember{mutableStateOf(false)}
-    var descripcionRepetido by remember{mutableStateOf(false)}
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -111,7 +109,7 @@ fun TipoTecnicoBody(
                         label = { Text(text = "Descripción") },
                         value = uiState.descripcion,
                         onValueChange =  onDescripcionChanged,
-                        isError = descripcionRepetido || descripcionVacio,
+                        isError = uiState.descripcionError != null,
                         keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
                         trailingIcon = {
                             Icon(
@@ -121,17 +119,9 @@ fun TipoTecnicoBody(
                         },
                         modifier = Modifier.fillMaxWidth()
                     )
-                    if(descripcionRepetido){
+                    if(uiState.descripcionError != null){
                         Text(
-                            text = "Tipo Técnico ya existe.",
-                            color = Color.Red,
-                            fontStyle = FontStyle.Italic,
-                            fontSize = 14.sp
-                        )
-                    }
-                    if(descripcionVacio){
-                        Text(
-                            text = "Campo Obligatorio.",
+                            text = uiState.descripcionError ?: "",
                             color = Color.Red,
                             fontStyle = FontStyle.Italic,
                             fontSize = 14.sp
@@ -147,9 +137,6 @@ fun TipoTecnicoBody(
                         OutlinedButton(
                             onClick = {
                                 onNewTipoTecnico()
-                                descripcionVacio = false
-                                descripcionRepetido = false
-
                             }
                         ) {
                             Icon(
@@ -165,14 +152,10 @@ fun TipoTecnicoBody(
                                 if (onValidation()) {
                                     onSaveTipoTecnico()
                                     guardo = true
-                                    descripcionVacio = false
-                                    descripcionRepetido = false
                                     goBackTipoTecnicoList()
                                 }
                                 else{
                                     errorGuardar = true
-                                    descripcionVacio = uiState.descripcionEmpty
-                                    descripcionRepetido = uiState.descripcionRepetida
                                 }
                             }
                         ) {
@@ -187,8 +170,6 @@ fun TipoTecnicoBody(
                             onClick = {
                                 if(uiState.tipoId != null){
                                     showDialog = true
-                                    descripcionVacio = false
-                                    descripcionRepetido = false
                                 }else{
                                     errorEliminar = true
                                 }

@@ -39,9 +39,17 @@ class TipoTecnicoViewModel(private val repository: TipoTecnicoRepository, privat
 
     fun onDescripcionChanged(descripcion: String){
         val regex = Regex("[\\p{L} ]*")
+        val descripcionError = when {
+            descripcion.isEmpty() -> "Campo Obligatorio"
+            descripcionExists(descripcion, uiState.value.tipoId) -> "Tipo técnico ya existe"
+            else -> null
+        }
         if (descripcion.matches(regex) && !descripcion.startsWith(" ")) {
             uiState.update {
-                it.copy(descripcion = descripcion)
+                it.copy(
+                    descripcion = descripcion,
+                    descripcionError = descripcionError
+                )
             }
         }
     }
@@ -63,12 +71,15 @@ class TipoTecnicoViewModel(private val repository: TipoTecnicoRepository, privat
         }
     }
     fun validation(): Boolean {
-        uiState.value.descripcionEmpty = (uiState.value.descripcion.isEmpty())
-        uiState.value.descripcionRepetida = descripcionExists(uiState.value.descripcion, uiState.value.tipoId)
-        uiState.update {
-            it.copy( saveSuccess =  !uiState.value.descripcionEmpty && !uiState.value.descripcionRepetida)
+        val descripcionEmpty = uiState.value.descripcion.isEmpty()
+        val descripcionRepeated = descripcionExists(uiState.value.descripcion, uiState.value.tipoId)
+        if (descripcionEmpty) {
+            uiState.update { it.copy(descripcionError = "Campo Obligatorio.") }
         }
-        return uiState.value.saveSuccess
+        if (descripcionRepeated) {
+            uiState.update { it.copy(descripcionError = "Tipo técnico ya existe") }
+        }
+        return !descripcionEmpty && !descripcionRepeated
     }
     private fun descripcionExists(descripcion: String, id: Int?): Boolean {
         return tipoTecnicos.value.any { it.descripcion?.replace(" ", "")?.uppercase() == descripcion.replace(" ", "").uppercase() && it.tipoId != id }
@@ -78,8 +89,7 @@ class TipoTecnicoViewModel(private val repository: TipoTecnicoRepository, privat
 data class TipoTecnicoUIState(
     val tipoId: Int? = null,
     var descripcion: String = "",
-    var descripcionEmpty: Boolean = false,
-    var descripcionRepetida: Boolean = false,
+    var descripcionError: String? = null,
     var saveSuccess: Boolean = false
 )
 

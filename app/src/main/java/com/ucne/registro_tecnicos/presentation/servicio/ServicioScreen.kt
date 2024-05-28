@@ -101,11 +101,6 @@ fun ServicioBody(
     onNewServicio: () -> Unit,
     onValidation: () -> Boolean
 ) {
-    var descripcionVacia by remember { mutableStateOf(false) }
-    var clienteVacio by remember { mutableStateOf(false) }
-    var totalNoValido by remember { mutableStateOf(false) }
-    var sinTecnico by remember { mutableStateOf(false) }
-
     var guardo by remember { mutableStateOf(false) }
     var errorGuardar by remember { mutableStateOf(false) }
     var elimino by remember { mutableStateOf(false) }
@@ -170,11 +165,11 @@ fun ServicioBody(
                             onTecnicoChanged(it.tecnicoId ?: 0)
                         },
                         selectedItemId = uiState.tecnicoId,
-                        isError = sinTecnico
+                        isError = uiState.tecnicoIdError != null
                     )
-                    if (sinTecnico) {
+                    if (uiState.tecnicoIdError != null) {
                         Text(
-                            text = "Campo Obligatorio.",
+                            text = uiState.tecnicoIdError ?: "",
                             color = Color.Red,
                             fontStyle = FontStyle.Italic,
                             fontSize = 14.sp
@@ -185,7 +180,7 @@ fun ServicioBody(
                         label = { Text(text = "Cliente") },
                         value = uiState.cliente,
                         onValueChange = onClienteChanged,
-                        isError = clienteVacio,
+                        isError = uiState.clienteError != null,
                         keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
                         trailingIcon = {
                             Icon(
@@ -195,9 +190,9 @@ fun ServicioBody(
                         },
                         modifier = Modifier.fillMaxWidth()
                     )
-                    if (clienteVacio) {
+                    if (uiState.clienteError != null) {
                         Text(
-                            text = "Campo Obligatorio.",
+                            text = uiState.clienteError ?: "",
                             color = Color.Red,
                             fontStyle = FontStyle.Italic,
                             fontSize = 14.sp
@@ -208,7 +203,7 @@ fun ServicioBody(
                         label = { Text(text = "Descripción") },
                         value = uiState.descripcion,
                         onValueChange = onDescripcionChanged,
-                        isError = descripcionVacia,
+                        isError = uiState.descripcionError != null,
                         keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
                         trailingIcon = {
                             Icon(
@@ -218,9 +213,9 @@ fun ServicioBody(
                         },
                         modifier = Modifier.fillMaxWidth()
                     )
-                    if (descripcionVacia) {
+                    if (uiState.descripcionError != null) {
                         Text(
-                            text = "Campo Obligatorio.",
+                            text = uiState.descripcionError ?: "",
                             color = Color.Red,
                             fontStyle = FontStyle.Italic,
                             fontSize = 14.sp
@@ -236,7 +231,7 @@ fun ServicioBody(
                         keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number,
                             imeAction = ImeAction.Done
                         ),
-                        isError = totalNoValido,
+                        isError = uiState.totalError != null,
                         trailingIcon = {
                             Icon(
                                 painter = painterResource(id = R.drawable.icons8dollarblack),
@@ -245,9 +240,9 @@ fun ServicioBody(
                         },
                         modifier = Modifier.fillMaxWidth()
                     )
-                    if (totalNoValido) {
+                    if (uiState.totalError != null) {
                         Text(
-                            text = "Total debe ser > 0.0",
+                            text = uiState.totalError ?: "",
                             color = Color.Red,
                             fontStyle = FontStyle.Italic,
                             fontSize = 14.sp
@@ -263,10 +258,6 @@ fun ServicioBody(
                         OutlinedButton(
                             onClick = {
                                 onNewServicio()
-                                descripcionVacia = false
-                                clienteVacio = false
-                                totalNoValido = false
-                                sinTecnico = false
                             }
                         ) {
                             Icon(
@@ -282,17 +273,9 @@ fun ServicioBody(
                                 if (onValidation()) {
                                     onSaveServicio()
                                     guardo = true
-                                    descripcionVacia = false
-                                    totalNoValido = false
-                                    sinTecnico = false
-                                    clienteVacio = false
                                     goBackServicioList()
                                 } else {
                                     errorGuardar = true
-                                    descripcionVacia = uiState.descripcionEmpty
-                                    totalNoValido = uiState.totalEmpty
-                                    sinTecnico = uiState.tecnicoEmpty
-                                    clienteVacio = uiState.clienteEmpty
                                 }
                             }
                         ) {

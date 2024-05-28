@@ -88,11 +88,6 @@ fun TecnicoBody(
     onNewTecnico: () -> Unit,
     onValidation: () -> Boolean
 ) {
-    var nombreVacio by remember { mutableStateOf(false) }
-    var nombreRepetido by remember { mutableStateOf(false) }
-    var sueldoHoraNoValido by remember { mutableStateOf(false) }
-    var sinTipo by remember { mutableStateOf(false) }
-
     var guardo by remember { mutableStateOf(false) }
     var errorGuardar by remember { mutableStateOf(false) }
     var elimino by remember { mutableStateOf(false) }
@@ -127,7 +122,7 @@ fun TecnicoBody(
                         label = { Text(text = "Nombre") },
                         value = uiState.nombre,
                         onValueChange = onNombreChanged,
-                        isError = nombreVacio || nombreRepetido,
+                        isError = (uiState.nombreError != null),
                         keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
                         trailingIcon = {
                             Icon(
@@ -137,17 +132,9 @@ fun TecnicoBody(
                         },
                         modifier = Modifier.fillMaxWidth()
                     )
-                    if (nombreRepetido) {
+                    if(uiState.nombreError != null){
                         Text(
-                            text = "Nombre de técnico ya existe.",
-                            color = Color.Red,
-                            fontStyle = FontStyle.Italic,
-                            fontSize = 14.sp
-                        )
-                    }
-                    if (nombreVacio) {
-                        Text(
-                            text = "Campo Obligatorio.",
+                            text = uiState.nombreError ?: "",
                             color = Color.Red,
                             fontStyle = FontStyle.Italic,
                             fontSize = 14.sp
@@ -164,7 +151,7 @@ fun TecnicoBody(
                             keyboardType = KeyboardType.Number,
                             imeAction = ImeAction.Done
                         ),
-                        isError = sueldoHoraNoValido,
+                        isError = uiState.sueldoHoraError != null,
                         trailingIcon = {
                             Icon(
                                 painter = painterResource(id = R.drawable.icons8dollarblack),
@@ -173,9 +160,9 @@ fun TecnicoBody(
                         },
                         modifier = Modifier.fillMaxWidth()
                     )
-                    if (sueldoHoraNoValido) {
+                    if (uiState.sueldoHoraError != null) {
                         Text(
-                            text = "Sueldo por Hora debe ser > 0.0",
+                            text = uiState.sueldoHoraError ?: "",
                             color = Color.Red,
                             fontStyle = FontStyle.Italic,
                             fontSize = 14.sp
@@ -192,11 +179,11 @@ fun TecnicoBody(
                             onTipoTecnicoChanged(it.tipoId ?: 0)
                         },
                         selectedItemId = uiState.tipoId,
-                        isError = sinTipo
+                        isError = uiState.tipoError != null,
                     )
-                    if (sinTipo) {
+                    if (uiState.tipoError != null) {
                         Text(
-                            text = "Campo Obligatorio.",
+                            text = uiState.tipoError ?: "",
                             color = Color.Red,
                             fontStyle = FontStyle.Italic,
                             fontSize = 14.sp
@@ -211,10 +198,6 @@ fun TecnicoBody(
                         OutlinedButton(
                             onClick = {
                                 onNewTecnico()
-                                nombreVacio = false
-                                sueldoHoraNoValido = false
-                                sinTipo = false
-                                nombreRepetido = false
                             }
                         ) {
                             Icon(
@@ -230,17 +213,9 @@ fun TecnicoBody(
                                 if (onValidation()) {
                                     onSaveTecnico()
                                     guardo = true
-                                    nombreVacio = false
-                                    sueldoHoraNoValido = false
-                                    sinTipo = false
-                                    nombreRepetido = false
                                     goBack()
                                 } else {
                                     errorGuardar = true
-                                    nombreVacio = uiState.nombreEmpty
-                                    sueldoHoraNoValido = uiState.sueldoHoraEmpty
-                                    nombreRepetido = uiState.nombreRepetido
-                                    sinTipo = uiState.tipoEmpty
                                 }
                             }
                         ) {

@@ -58,7 +58,10 @@ class ServicioViewModel(
     fun onDescripcionChanged(descripcion: String){
         if (!descripcion.startsWith(" ")) {
             uiState.update {
-                it.copy(descripcion = descripcion)
+                it.copy(
+                    descripcion = descripcion,
+                    descripcionError = null
+                )
             }
         }
     }
@@ -66,7 +69,10 @@ class ServicioViewModel(
         val regex = Regex("[\\p{L} ]*")
         if (cliente.matches(regex) && !cliente.startsWith(" ")) {
             uiState.update {
-                it.copy(cliente = cliente)
+                it.copy(
+                    cliente = cliente,
+                    clienteError = null
+                )
             }
         }
     }
@@ -82,14 +88,15 @@ class ServicioViewModel(
             val total = totalStr.toDoubleOrNull() ?: 0.0
             uiState.update {
                 it.copy(
-                    total = total
+                    total = total,
+                    totalError = null
                 )
             }
         }
     }
     fun onTecnicoChanged(tecnicoId: Int?) {
         uiState.update {
-            it.copy(tecnicoId = tecnicoId)
+            it.copy(tecnicoId = tecnicoId, tecnicoIdError = null)
         }
     }
 
@@ -114,18 +121,23 @@ class ServicioViewModel(
     }
 
     fun validation(): Boolean {
-        uiState.value.descripcionEmpty = (uiState.value.descripcion.isEmpty())
-        uiState.value.clienteEmpty = (uiState.value.cliente.isEmpty())
-        uiState.value.totalEmpty = ((uiState.value.total ?: 0.0) <= 0.0)
-        uiState.value.tecnicoEmpty = (uiState.value.tecnicoId == null)
-        uiState.update {
-            it.copy( saveSuccess =  !uiState.value.descripcionEmpty &&
-                    !uiState.value.totalEmpty &&
-                    !uiState.value.tecnicoEmpty &&
-                    !uiState.value.clienteEmpty
-            )
+        val descripcionEmpty = uiState.value.descripcion.isEmpty()
+        val clienteEmpty = uiState.value.cliente.isEmpty()
+        val totalEmpty = (uiState.value.total ?: 0.0) <= 0.0
+        val tecnicoIdEmpty = uiState.value.tecnicoId == null
+        if (descripcionEmpty) {
+            uiState.update { it.copy(descripcionError = "Campo Obligatorio") }
         }
-        return uiState.value.saveSuccess
+        if (clienteEmpty) {
+            uiState.update { it.copy(clienteError = "Campo Obligatorio") }
+        }
+        if (totalEmpty) {
+            uiState.update { it.copy(totalError = "Debe ingresar un total") }
+        }
+        if (tecnicoIdEmpty) {
+            uiState.update { it.copy(tecnicoIdError = "Debe seleccionar un tecnico")}
+        }
+        return !descripcionEmpty && !clienteEmpty && !totalEmpty && !tecnicoIdEmpty
     }
 }
 
@@ -133,14 +145,13 @@ data class ServicioUIState(
     val servicioId: Int? = null,
     var fecha: LocalDate = LocalDate.now(),
     var descripcion: String = "",
-    var descripcionEmpty: Boolean = false,
+    var descripcionError: String? = null,
     var cliente: String = "",
-    var clienteEmpty: Boolean = false,
+    var clienteError: String? = null,
     var total: Double? = null,
-    var totalEmpty: Boolean = false,
+    var totalError: String? = null,
     var tecnicoId: Int? = null,
-    var tecnicoEmpty: Boolean = false,
-    var saveSuccess: Boolean = false,
+    var tecnicoIdError: String? = null,
 )
 
 fun ServicioUIState.toEntity(): ServicioEntity {
