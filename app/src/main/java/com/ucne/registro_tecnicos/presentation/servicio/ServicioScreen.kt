@@ -21,6 +21,8 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
@@ -85,6 +87,7 @@ fun ServicioScreen(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ServicioBody(
     uiState: ServicioUIState,
@@ -133,7 +136,11 @@ fun ServicioBody(
                         .padding(8.dp)
                 ) {
 
-                    OutlinedTextField(
+                     ExposedDropdownMenuBox(
+                        expanded = false,
+                        onExpandedChange = { showDatePicker = !showDatePicker }
+                    ) {
+                        OutlinedTextField(
                         label = { Text(text = "Fecha") },
                         value = uiState.fecha.format(DateTimeFormatter.ofPattern("MM/dd/yyyy")),
                         readOnly = true,
@@ -151,9 +158,11 @@ fun ServicioBody(
                             }
                         },
                         modifier = Modifier
+                            .menuAnchor()
                             .fillMaxWidth()
-                            .clickable(onClick = { showDatePicker = true })
-                    )
+                            .clickable(onClick = { showDatePicker = true } )
+                        )
+                    }
 
                     DropDownInput(
                         items = tecnicos,
